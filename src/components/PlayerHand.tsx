@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/types/game";
 import { PlayingCard } from "./PlayingCard";
-import { isValidPlay } from "@/utils/gameUtils";
+import { isValidPlay, sortCards } from "@/utils/gameUtils";
 import { motion } from "framer-motion";
 
 interface PlayerHandProps {
@@ -22,7 +22,7 @@ export const PlayerHand = ({
   position,
 }: PlayerHandProps) => {
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
-
+  const sortedCards = sortCards(cards); // Ensure cards are sorted by order
   const toggleCardSelection = (card: Card) => {
     if (!isCurrentPlayer) return;
 
