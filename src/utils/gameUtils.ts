@@ -66,8 +66,8 @@ export const isValidPlay = (
 };
 
 export const findStartingPlayer = (hands: Card[][]): number => {
-  const lowestCard = { suit: "spade" as Suit, rank: "3" as Rank, id: "spade-3" };
+  // Find the player with the 3 of diamonds
   return hands.findIndex(hand => 
-    hand.some(card => card.suit === lowestCard.suit && card.rank === lowestCard.rank)
+    hand.some(card => card.suit === "diamond" && card.rank === "3")
   );
 };
