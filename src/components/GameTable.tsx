@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { isValidPlay } from "@/utils/gameUtils";
+import { PlayingCard } from "./PlayingCard";
 
 interface GameTableProps {
   gameState: GameState;
