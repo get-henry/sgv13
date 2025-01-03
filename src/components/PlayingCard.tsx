@@ -13,7 +13,7 @@ interface PlayingCardProps {
 
 export const PlayingCard = ({
   card,
-  isSelected,
+  isSelected = false,
   isPlayable = true,
   onClick,
   className,
@@ -36,8 +36,8 @@ export const PlayingCard = ({
       whileHover={isPlayable ? { y: -10 } : {}}
       onClick={isPlayable ? onClick : undefined}
       className={cn(
-        "relative w-24 h-36 rounded-lg bg-white shadow-lg cursor-pointer transition-transform",
-        isSelected && "transform -translate-y-4",
+        "relative w-24 h-36 rounded-lg bg-white shadow-lg cursor-pointer transition-transform duration-300",
+        isSelected ? "border-4 border-blue-500 transform -translate-y-4" : "",
         !isPlayable && "opacity-70 cursor-default",
         className
       )}
