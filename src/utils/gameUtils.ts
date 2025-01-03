@@ -5,12 +5,13 @@ const RANKS: Rank[] = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "
 
 export const createDeck = (): Card[] => {
   const deck: Card[] = [];
-  SUITS.forEach((suit) => {
-    RANKS.forEach((rank) => {
+  RANKS.forEach((rank, rankIndex) => {
+    SUITS.forEach((suit, suitIndex) => {
       deck.push({
         suit,
         rank,
-        id: `${suit}-${rank}`,
+        id: `${rank}-${suit}`,
+        order: rankIndex * 4 + suitIndex, // Calculate order dynamically
       });
     });
   });
