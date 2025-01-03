@@ -72,7 +72,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       })}
 
       {currentPlayer && (
-        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4">
+        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-10">
           <Button
             variant="secondary"
             onClick={handlePlay}
