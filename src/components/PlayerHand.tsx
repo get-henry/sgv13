@@ -19,13 +19,13 @@ export const PlayerHand = ({
 }: PlayerHandProps) => {
   const containerStyles = {
     bottom: "bottom-4 left-1/2 -translate-x-1/2",
-    left: "left-20 top-1/2 -translate-y-1/2 rotate-90",
+    left: "left-32 top-1/2 -translate-y-1/2 rotate-90",
     top: "top-4 left-1/2 -translate-x-1/2 rotate-180",
-    right: "right-20 top-1/2 -translate-y-1/2 -rotate-90",
+    right: "right-32 top-1/2 -translate-y-1/2 -rotate-90",
   }[position];
 
-  const cardSpacing = position === "left" || position === "right" ? "gap-1" : "gap-2";
-  const handWidth = position === "left" || position === "right" ? "w-[400px]" : "w-auto";
+  const cardSpacing = "gap-2";
+  const handWidth = "w-auto max-w-[600px]";
 
   return (
     <motion.div
