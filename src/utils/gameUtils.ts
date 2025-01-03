@@ -27,12 +27,17 @@ export const shuffleDeck = (deck: Card[]): Card[] => {
   return newDeck;
 };
 
+export const sortCards = (cards: Card[]): Card[] => {
+  return [...cards].sort((a, b) => a.order - b.order);
+};
+
 export const dealCards = (deck: Card[]): Card[][] => {
   const hands: Card[][] = [[], [], [], []];
   for (let i = 0; i < deck.length; i++) {
     hands[i % 4].push(deck[i]);
   }
-  return hands;
+  // Sort each hand by order
+  return hands.map((hand) => sortCards(hand));
 };
 
 export const compareCards = (card1: Card, card2: Card): number => {
