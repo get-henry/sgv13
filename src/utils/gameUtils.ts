@@ -45,16 +45,16 @@ export const compareCards = (card1: Card, card2: Card): number => {
 };
 
 export const isValidPlay = (
-  cards: Card[],
+  selectedCards: Card[],
   lastPlay: { playType: PlayType; cards: Card[] } | null
 ): boolean => {
   if (!lastPlay) return true;
   
   // Implement complex validation logic here based on game rules
   // This is a simplified version
-  if (cards.length !== lastPlay.cards.length) return false;
+  if (selectedCards.length !== lastPlay.cards.length) return false;
   
-  const highestNewCard = cards.reduce((prev, curr) => 
+  const highestNewCard = selectedCards.reduce((prev, curr) => 
     compareCards(prev, curr) > 0 ? prev : curr
   );
   
