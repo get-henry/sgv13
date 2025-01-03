@@ -7,10 +7,10 @@ import { toast } from "sonner";
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>({
     players: [
-      { id: "1", name: "Player 1", cards: [], isCurrentTurn: false },
-      { id: "2", name: "Player 2", cards: [], isCurrentTurn: false },
-      { id: "3", name: "Player 3", cards: [], isCurrentTurn: false },
-      { id: "4", name: "Player 4", cards: [], isCurrentTurn: false },
+      { id: "1", name: "You", cards: [], isCurrentTurn: false, isAI: false },
+      { id: "2", name: "AI East", cards: [], isCurrentTurn: false, isAI: true },
+      { id: "3", name: "AI North", cards: [], isCurrentTurn: false, isAI: true },
+      { id: "4", name: "AI West", cards: [], isCurrentTurn: false, isAI: true },
     ],
     currentPlayerId: "",
     lastPlay: null,
@@ -26,15 +26,32 @@ const Index = () => {
     const deck = shuffleDeck(createDeck());
     const hands = dealCards(deck);
     const startingPlayerIndex = findStartingPlayer(hands);
+    
+    // Rearrange the hands so that if the human player has the starting hand,
+    // they stay at position 0 (bottom). Otherwise, rotate the positions until
+    // the human player is at the bottom.
+    const rotateToBottom = (arr: any[], startIndex: number) => {
+      if (startIndex === 0) return arr;
+      const rotated = [...arr];
+      while (rotated[0].isAI) {
+        rotated.push(rotated.shift());
+      }
+      return rotated;
+    };
 
-    setGameState(prev => ({
-      ...prev,
-      players: prev.players.map((player, index) => ({
+    const arrangedPlayers = rotateToBottom(
+      gameState.players.map((player, index) => ({
         ...player,
         cards: hands[index],
         isCurrentTurn: index === startingPlayerIndex,
       })),
-      currentPlayerId: prev.players[startingPlayerIndex].id,
+      startingPlayerIndex
+    );
+
+    setGameState(prev => ({
+      ...prev,
+      players: arrangedPlayers,
+      currentPlayerId: arrangedPlayers[startingPlayerIndex].id,
       lastPlay: null,
       gameStatus: "playing",
       winner: null,

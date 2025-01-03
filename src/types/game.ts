@@ -12,6 +12,7 @@ export interface Player {
   name: string;
   cards: Card[];
   isCurrentTurn: boolean;
+  isAI: boolean;
 }
 
 export type PlayType = "single" | "pair" | "triple" | "four" | "straight" | "consecutive-pairs";
