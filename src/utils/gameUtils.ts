@@ -15,6 +15,7 @@ export const createDeck = (): Card[] => {
       });
     });
   });
+  console.log("Created deck:", deck); // After creating the deck
   return deck;
 };
 
@@ -24,10 +25,12 @@ export const shuffleDeck = (deck: Card[]): Card[] => {
     const j = Math.floor(Math.random() * (i + 1));
     [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
   }
+  console.log("Shuffled deck:", shuffledDeck); // After shuffling the deck
   return newDeck;
 };
 
 export const sortCards = (cards: Card[]): Card[] => {
+  console.log("Sorting cards:", cards);
   return [...cards].sort((a, b) => a.order - b.order);
 };
 
@@ -67,7 +70,7 @@ export const isValidPlay = (
   const highestLastCard = lastPlay.cards.reduce((prev, curr) =>
     compareCards(prev, curr) > 0 ? prev : curr
   );
-  
+  console.log("Validating play:", { selectedCards, lastPlay, isValid });
   return compareCards(highestNewCard, highestLastCard) > 0;
 };
 
