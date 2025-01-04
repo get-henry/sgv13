@@ -25,7 +25,7 @@ export const shuffleDeck = (deck: Card[]): Card[] => {
     const j = Math.floor(Math.random() * (i + 1));
     [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
   }
-  console.log("Shuffled deck:", shuffledDeck); // After shuffling the deck
+  console.log("Shuffled deck:", newDeck); // After shuffling the deck
   return newDeck;
 };
 
