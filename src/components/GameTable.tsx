@@ -49,7 +49,8 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {gameState.lastPlay && (
+        {console.log("Last play cards:", gameState.lastPlay?.cards);
+          gameState.lastPlay && (
           <div className="flex gap-2">
             {gameState.lastPlay.cards.map(card => (
               <PlayingCard key={card.id} card={card} isPlayable={false} />
