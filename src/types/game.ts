@@ -5,6 +5,7 @@ export interface Card {
   suit: Suit;
   rank: Rank;
   id: string;
+  order: number;
 }
 
 export interface Player {

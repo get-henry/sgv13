@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "@/types/game";
+import { Card, PlayType } from "@/types/game";
 import { PlayingCard } from "./PlayingCard";
 import { isValidPlay, sortCards } from "@/utils/gameUtils";
 import { motion } from "framer-motion";
@@ -9,7 +9,7 @@ interface PlayerHandProps {
   isCurrentPlayer: boolean;
   selectedCards: Card[];
   onCardSelect: (cards: Card[]) => void;
-  lastPlay: { playType: string; cards: Card[] } | null;
+  lastPlay: { playType: PlayType; cards: Card[] } | null;
   position: "bottom" | "left" | "top" | "right";
 }
 
@@ -30,21 +30,21 @@ export const PlayerHand = ({
     if (!isCurrentPlayer) return; // Disable selection if it's not the player's turn
 
     const isAlreadySelected = localSelectedCards.includes(card);
-    console.log("Toggling card selection:", card); // Before updating localSelectedCards
+    console.log("Toggling card selection:", card);
     const updatedSelection = isAlreadySelected
-      ? localSelectedCards.filter((c) => c !== card) // Remove the card if already selected
-      : [...localSelectedCards, card]; // Add the card if not selected
-    console.log("Current selected cards:", updatedSelection); // After updating selection
+      ? localSelectedCards.filter((c) => c !== card)
+      : [...localSelectedCards, card];
+    console.log("Current selected cards:", updatedSelection);
+    
     // Validate the updated selection
     if (isValidPlay(updatedSelection, lastPlay)) {
-      console.log("Valid play:", updatedSelection); // If validation passes
+      console.log("Valid play:", updatedSelection);
       setLocalSelectedCards(updatedSelection);
-      onCardSelect(updatedSelection); // Notify parent of the updated selection
+      onCardSelect(updatedSelection);
     } else {
-       console.log("Invalid play attempt:", updatedSelection); // If validation fails
+      console.log("Invalid play attempt:", updatedSelection);
     }
   };
-
 
   const containerStyles = {
     bottom: "bottom-4 left-1/2 -translate-x-1/2",
@@ -63,7 +63,7 @@ export const PlayerHand = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {cards.map((card, index) => (
+      {sortedCards.map((card, index) => (
         <PlayingCard
           key={card.id}
           card={card}

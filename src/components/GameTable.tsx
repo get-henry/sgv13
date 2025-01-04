@@ -17,13 +17,9 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
 
-  const handleCardSelect = (card: Card) => {
-    setSelectedCards(prev => 
-      prev.includes(card)
-        ? prev.filter(c => c.id !== card.id)
-        : [...prev, card]
-    );
-    console.log("Selected cards:", selectedCards);
+  const handleCardSelect = (cards: Card[]) => {
+    setSelectedCards(cards);
+    console.log("Selected cards:", cards);
   };
 
   const handlePlay = () => {
@@ -41,6 +37,9 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     setSelectedCards([]);
   };
 
+  // Log last play cards outside of JSX
+  console.log("Last play cards:", gameState.lastPlay?.cards);
+
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
       <motion.div
@@ -49,7 +48,6 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {console.log("Last play cards:", gameState.lastPlay?.cards)}
         {gameState.lastPlay && (
           <div className="flex gap-2">
             {gameState.lastPlay.cards.map(card => (
@@ -68,6 +66,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
             isCurrentPlayer={player.id === gameState.currentPlayerId}
             selectedCards={selectedCards}
             onCardSelect={handleCardSelect}
+            lastPlay={gameState.lastPlay}
             position={position}
           />
         );
