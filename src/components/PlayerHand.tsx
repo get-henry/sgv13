@@ -30,14 +30,18 @@ export const PlayerHand = ({
     if (!isCurrentPlayer) return; // Disable selection if it's not the player's turn
 
     const isAlreadySelected = localSelectedCards.includes(card);
+    console.log("Toggling card selection:", card); // Before updating localSelectedCards
     const updatedSelection = isAlreadySelected
       ? localSelectedCards.filter((c) => c !== card) // Remove the card if already selected
       : [...localSelectedCards, card]; // Add the card if not selected
-
+    console.log("Current selected cards:", updatedSelection); // After updating selection
     // Validate the updated selection
     if (isValidPlay(updatedSelection, lastPlay)) {
+      console.log("Valid play:", updatedSelection); // If validation passes
       setLocalSelectedCards(updatedSelection);
       onCardSelect(updatedSelection); // Notify parent of the updated selection
+    } else {
+       console.log("Invalid play attempt:", updatedSelection); // If validation fails
     }
   };
 
