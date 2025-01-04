@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Card, Player, GameState } from "@/types/game";
+import { useState, useEffect } from "react";
+import { Card, Player, GameState, PlayType } from "@/types/game";
 import { PlayerHand } from "./PlayerHand";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { isValidPlay } from "@/utils/gameUtils";
+import { isValidPlay, getPlayType } from "@/utils/gameUtils";
 import { PlayingCard } from "./PlayingCard";
 
 interface GameTableProps {
@@ -25,6 +25,11 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const validatePlay = (cards: Card[]): string | null => {
     if (!cards.length) {
       return "Please select cards to play";
+    }
+
+    const playType = getPlayType(cards);
+    if (!playType) {
+      return "Invalid card combination";
     }
 
     if (!isValidPlay(cards, gameState.lastPlay)) {
@@ -49,8 +54,13 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     setSelectedCards([]);
   };
 
-  // Log last play for debugging
-  console.log("Last play:", gameState.lastPlay);
+  // Show game status messages
+  useEffect(() => {
+    if (gameState.gameStatus === "finished" && gameState.winner) {
+      const winner = gameState.players.find(p => p.id === gameState.winner);
+      toast.success(`${winner?.name} wins the game!`);
+    }
+  }, [gameState.gameStatus, gameState.winner]);
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
@@ -61,13 +71,21 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {gameState.lastPlay && (
-          <div className="flex gap-2">
-            {gameState.lastPlay.cards.map(card => (
-              <PlayingCard key={card.id} card={card} isPlayable={false} />
-            ))}
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {gameState.lastPlay && (
+            <motion.div 
+              className="flex gap-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {gameState.lastPlay.cards.map(card => (
+                <PlayingCard key={card.id} card={card} isPlayable={false} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Player hands */}
@@ -93,13 +111,14 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
               onCardSelect={handleCardSelect}
               lastPlay={gameState.lastPlay}
               position={position}
+              playerName={player.name}
             />
           </div>
         );
       })}
 
       {/* Action buttons */}
-      {currentPlayer && (
+      {currentPlayer && gameState.gameStatus === "playing" && (
         <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-10">
           <Button
             variant="secondary"
@@ -116,6 +135,31 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
             Pass
           </Button>
         </div>
+      )}
+
+      {/* Game over overlay */}
+      {gameState.gameStatus === "finished" && (
+        <motion.div 
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div 
+            className="bg-white rounded-xl p-8 text-center"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              Game Over!
+            </h2>
+            <p className="text-lg mb-6">
+              {gameState.winner && `${gameState.players.find(p => p.id === gameState.winner)?.name} wins!`}
+            </p>
+            <Button onClick={() => window.location.reload()} className="w-full">
+              Play Again
+            </Button>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

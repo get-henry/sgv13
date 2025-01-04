@@ -15,7 +15,6 @@ export const createDeck = (): Card[] => {
       });
     });
   });
-  console.log("Created deck:", deck);
   return deck;
 };
 
@@ -25,12 +24,10 @@ export const shuffleDeck = (deck: Card[]): Card[] => {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  console.log("Shuffled deck:", shuffled);
   return shuffled;
 };
 
 export const sortCards = (cards: Card[]): Card[] => {
-  console.log("Sorting cards:", cards);
   return [...cards].sort((a, b) => a.order - b.order);
 };
 
@@ -39,7 +36,6 @@ export const dealCards = (deck: Card[]): Card[][] => {
   for (let i = 0; i < deck.length; i++) {
     hands[i % 4].push(deck[i]);
   }
-  // Sort each hand by order
   return hands.map((hand) => sortCards(hand));
 };
 
@@ -53,13 +49,35 @@ export const compareCards = (card1: Card, card2: Card): number => {
   return suit1Index - suit2Index;
 };
 
+export const getPlayType = (cards: Card[]): PlayType | null => {
+  if (!cards.length) return null;
+  
+  if (cards.length === 1) return "single";
+  
+  if (cards.length === 2 && cards[0].rank === cards[1].rank) {
+    return "pair";
+  }
+  
+  if (cards.length === 3 && cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank) {
+    return "triple";
+  }
+  
+  if (cards.length === 4 && cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank && cards[2].rank === cards[3].rank) {
+    return "four";
+  }
+  
+  // Add more play type validations here
+  return null;
+};
+
 export const isValidPlay = (
   selectedCards: Card[],
   lastPlay: { playType: PlayType; cards: Card[] } | null
 ): boolean => {
   if (!lastPlay) return true;
   
-  if (selectedCards.length !== lastPlay.cards.length) return false;
+  const playType = getPlayType(selectedCards);
+  if (!playType || playType !== lastPlay.playType) return false;
   
   const highestNewCard = selectedCards.reduce((prev, curr) => 
     compareCards(prev, curr) > 0 ? prev : curr
@@ -69,13 +87,10 @@ export const isValidPlay = (
     compareCards(prev, curr) > 0 ? prev : curr
   );
   
-  const isValid = compareCards(highestNewCard, highestLastCard) > 0;
-  console.log("Validating play:", { selectedCards, lastPlay, isValid });
-  return isValid;
+  return compareCards(highestNewCard, highestLastCard) > 0;
 };
 
 export const findStartingPlayer = (hands: Card[][]): number => {
-  // Find the player with the 3 of diamonds
   return hands.findIndex(hand => 
     hand.some(card => card.suit === "diamond" && card.rank === "3")
   );

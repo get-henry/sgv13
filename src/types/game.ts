@@ -14,6 +14,7 @@ export interface Player {
   cards: Card[];
   isCurrentTurn: boolean;
   isAI: boolean;
+  gamesWon: number;
 }
 
 export type PlayType = "single" | "pair" | "triple" | "four" | "straight" | "consecutive-pairs";
@@ -24,7 +25,26 @@ export interface GameState {
   lastPlay: {
     playType: PlayType;
     cards: Card[];
+    playerId: string;
   } | null;
   gameStatus: "waiting" | "playing" | "finished";
   winner: string | null;
+  gameHistory: {
+    playerId: string;
+    cards: Card[];
+    playType: PlayType;
+    timestamp: number;
+  }[];
+}
+
+export interface GameHistoryEntry {
+  winner: string;
+  players: Player[];
+  plays: {
+    playerId: string;
+    cards: Card[];
+    playType: PlayType;
+    timestamp: number;
+  }[];
+  timestamp: number;
 }
