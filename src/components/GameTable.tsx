@@ -23,6 +23,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         ? prev.filter(c => c.id !== card.id)
         : [...prev, card]
     );
+    console.log("Selected cards:", selectedCards); // Add this after setSelectedCards
   };
 
   const handlePlay = () => {
@@ -35,7 +36,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       toast.error("Invalid play");
       return;
     }
-
+    console.log("Playing cards:", selectedCards); // Before calling onPlay
     onPlay(selectedCards);
     setSelectedCards([]);
   };
