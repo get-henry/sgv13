@@ -23,7 +23,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         ? prev.filter(c => c.id !== card.id)
         : [...prev, card]
     );
-    console.log("Selected cards:", selectedCards); // Add this after setSelectedCards
+    console.log("Selected cards:", selectedCards);
   };
 
   const handlePlay = () => {
@@ -36,7 +36,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       toast.error("Invalid play");
       return;
     }
-    console.log("Playing cards:", selectedCards); // Before calling onPlay
+    console.log("Playing cards:", selectedCards);
     onPlay(selectedCards);
     setSelectedCards([]);
   };
@@ -49,8 +49,8 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {console.log("Last play cards:", gameState.lastPlay?.cards);
-          gameState.lastPlay && (
+        {console.log("Last play cards:", gameState.lastPlay?.cards)}
+        {gameState.lastPlay && (
           <div className="flex gap-2">
             {gameState.lastPlay.cards.map(card => (
               <PlayingCard key={card.id} card={card} isPlayable={false} />
