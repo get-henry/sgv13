@@ -11,22 +11,22 @@ export const createDeck = (): Card[] => {
         suit,
         rank,
         id: `${rank}-${suit}`,
-        order: rankIndex * 4 + suitIndex, // Calculate order dynamically
+        order: rankIndex * 4 + suitIndex,
       });
     });
   });
-  console.log("Created deck:", deck); // After creating the deck
+  console.log("Created deck:", deck);
   return deck;
 };
 
 export const shuffleDeck = (deck: Card[]): Card[] => {
-  const newDeck = [...deck];
-  for (let i = newDeck.length - 1; i > 0; i--) {
+  const shuffled = [...deck];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  console.log("Shuffled deck:", newDeck); // After shuffling the deck
-  return newDeck;
+  console.log("Shuffled deck:", shuffled);
+  return shuffled;
 };
 
 export const sortCards = (cards: Card[]): Card[] => {
@@ -59,8 +59,6 @@ export const isValidPlay = (
 ): boolean => {
   if (!lastPlay) return true;
   
-  // Implement complex validation logic here based on game rules
-  // This is a simplified version
   if (selectedCards.length !== lastPlay.cards.length) return false;
   
   const highestNewCard = selectedCards.reduce((prev, curr) => 
@@ -70,8 +68,10 @@ export const isValidPlay = (
   const highestLastCard = lastPlay.cards.reduce((prev, curr) =>
     compareCards(prev, curr) > 0 ? prev : curr
   );
+  
+  const isValid = compareCards(highestNewCard, highestLastCard) > 0;
   console.log("Validating play:", { selectedCards, lastPlay, isValid });
-  return compareCards(highestNewCard, highestLastCard) > 0;
+  return isValid;
 };
 
 export const findStartingPlayer = (hands: Card[][]): number => {
