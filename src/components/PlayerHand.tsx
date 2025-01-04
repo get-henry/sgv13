@@ -22,20 +22,25 @@ export const PlayerHand = ({
   position,
 }: PlayerHandProps) => {
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
-  const sortedCards = sortCards(cards); // Ensure cards are sorted by order
-  const toggleCardSelection = (card: Card) => {
-    if (!isCurrentPlayer) return;
+  // Sort the cards by order before rendering
+  const sortedCards = sortCards(cards);
 
-    const updatedSelection = localSelectedCards.includes(card)
-      ? localSelectedCards.filter((c) => c !== card)
-      : [...localSelectedCards, card];
+  // Toggles the selection of a card
+  const toggleCardSelection = (card: Card) => {
+    if (!isCurrentPlayer) return; // Disable selection if it's not the player's turn
+
+    const isAlreadySelected = localSelectedCards.includes(card);
+    const updatedSelection = isAlreadySelected
+      ? localSelectedCards.filter((c) => c !== card) // Remove the card if already selected
+      : [...localSelectedCards, card]; // Add the card if not selected
 
     // Validate the updated selection
     if (isValidPlay(updatedSelection, lastPlay)) {
       setLocalSelectedCards(updatedSelection);
-      onCardSelect(updatedSelection);
+      onCardSelect(updatedSelection); // Notify parent of the updated selection
     }
   };
+
 
   const containerStyles = {
     bottom: "bottom-4 left-1/2 -translate-x-1/2",
