@@ -22,26 +22,39 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     console.log("Selected cards:", cards);
   };
 
+  const validatePlay = (cards: Card[]): string | null => {
+    if (!cards.length) {
+      return "Please select cards to play";
+    }
+
+    if (!isValidPlay(cards, gameState.lastPlay)) {
+      if (gameState.lastPlay) {
+        return "Selected cards must be stronger than the last play";
+      }
+      return "Invalid card combination";
+    }
+
+    return null;
+  };
+
   const handlePlay = () => {
-    if (!selectedCards.length) {
-      toast.error("Please select cards to play");
+    const error = validatePlay(selectedCards);
+    if (error) {
+      toast.error(error);
       return;
     }
 
-    if (!isValidPlay(selectedCards, gameState.lastPlay)) {
-      toast.error("Invalid play");
-      return;
-    }
     console.log("Playing cards:", selectedCards);
     onPlay(selectedCards);
     setSelectedCards([]);
   };
 
-  // Log last play cards outside of JSX
-  console.log("Last play cards:", gameState.lastPlay?.cards);
+  // Log last play for debugging
+  console.log("Last play:", gameState.lastPlay);
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
+      {/* Center table area for last play */}
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl bg-black/10 backdrop-blur-sm"
         initial={{ opacity: 0, scale: 0.8 }}
@@ -57,21 +70,35 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         )}
       </motion.div>
 
+      {/* Player hands */}
       {gameState.players.map((player, index) => {
         const position = ["bottom", "left", "top", "right"][index] as "bottom" | "left" | "top" | "right";
+        const isCurrentPlayer = player.id === gameState.currentPlayerId;
+        
         return (
-          <PlayerHand
-            key={player.id}
-            cards={player.cards}
-            isCurrentPlayer={player.id === gameState.currentPlayerId}
-            selectedCards={selectedCards}
-            onCardSelect={handleCardSelect}
-            lastPlay={gameState.lastPlay}
-            position={position}
-          />
+          <div key={player.id} className="relative">
+            {/* Current player indicator */}
+            {isCurrentPlayer && (
+              <motion.div
+                className="absolute inset-0 bg-blue-500/20 rounded-xl z-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            )}
+            <PlayerHand
+              cards={player.cards}
+              isCurrentPlayer={isCurrentPlayer}
+              selectedCards={selectedCards}
+              onCardSelect={handleCardSelect}
+              lastPlay={gameState.lastPlay}
+              position={position}
+            />
+          </div>
         );
       })}
 
+      {/* Action buttons */}
       {currentPlayer && (
         <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-10">
           <Button

@@ -22,28 +22,20 @@ export const PlayerHand = ({
   position,
 }: PlayerHandProps) => {
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
-  // Sort the cards by order before rendering
   const sortedCards = sortCards(cards);
 
-  // Toggles the selection of a card
   const toggleCardSelection = (card: Card) => {
-    if (!isCurrentPlayer) return; // Disable selection if it's not the player's turn
+    if (!isCurrentPlayer) return;
 
     const isAlreadySelected = localSelectedCards.includes(card);
-    console.log("Toggling card selection:", card);
     const updatedSelection = isAlreadySelected
-      ? localSelectedCards.filter((c) => c !== card)
+      ? localSelectedCards.filter(c => c !== card)
       : [...localSelectedCards, card];
-    console.log("Current selected cards:", updatedSelection);
+
+    console.log("Updated selection:", updatedSelection);
     
-    // Validate the updated selection
-    if (isValidPlay(updatedSelection, lastPlay)) {
-      console.log("Valid play:", updatedSelection);
-      setLocalSelectedCards(updatedSelection);
-      onCardSelect(updatedSelection);
-    } else {
-      console.log("Invalid play attempt:", updatedSelection);
-    }
+    setLocalSelectedCards(updatedSelection);
+    onCardSelect(updatedSelection);
   };
 
   const containerStyles = {
@@ -53,12 +45,9 @@ export const PlayerHand = ({
     right: "right-32 top-1/2 -translate-y-1/2 -rotate-90",
   }[position];
 
-  const cardSpacing = "gap-2";
-  const handWidth = "w-auto max-w-[600px]";
-
   return (
     <motion.div
-      className={`absolute ${containerStyles} flex ${cardSpacing} ${handWidth} overflow-visible`}
+      className={`absolute ${containerStyles} flex gap-2 w-auto max-w-[600px] overflow-visible z-10`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
