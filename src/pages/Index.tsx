@@ -7,15 +7,16 @@ import { toast } from "sonner";
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>({
     players: [
-      { id: "1", name: "You", cards: [], isCurrentTurn: false, isAI: false },
-      { id: "2", name: "AI East", cards: [], isCurrentTurn: false, isAI: true },
-      { id: "3", name: "AI North", cards: [], isCurrentTurn: false, isAI: true },
-      { id: "4", name: "AI West", cards: [], isCurrentTurn: false, isAI: true },
+      { id: "1", name: "You", cards: [], isCurrentTurn: false, isAI: false, gamesWon: 0 },
+      { id: "2", name: "AI East", cards: [], isCurrentTurn: false, isAI: true, gamesWon: 0 },
+      { id: "3", name: "AI North", cards: [], isCurrentTurn: false, isAI: true, gamesWon: 0 },
+      { id: "4", name: "AI West", cards: [], isCurrentTurn: false, isAI: true, gamesWon: 0 },
     ],
     currentPlayerId: "",
     lastPlay: null,
     gameStatus: "waiting",
     winner: null,
+    gameHistory: [],
   });
 
   useEffect(() => {
@@ -27,9 +28,6 @@ const Index = () => {
     const hands = dealCards(deck);
     const startingPlayerIndex = findStartingPlayer(hands);
     
-    // Rearrange the hands so that if the human player has the starting hand,
-    // they stay at position 0 (bottom). Otherwise, rotate the positions until
-    // the human player is at the bottom.
     const rotateToBottom = (arr: any[], startIndex: number) => {
       if (startIndex === 0) return arr;
       const rotated = [...arr];
@@ -55,6 +53,7 @@ const Index = () => {
       lastPlay: null,
       gameStatus: "playing",
       winner: null,
+      gameHistory: [],
     }));
 
     toast.success("New game started!");
@@ -84,13 +83,20 @@ const Index = () => {
 
       const winner = updatedPlayers.find(p => p.cards.length === 0)?.id || null;
 
+      const newPlay = {
+        playType: "single" as const,
+        cards,
+        playerId: prev.currentPlayerId,
+      };
+
       return {
         ...prev,
         players: updatedPlayers,
         currentPlayerId: prev.players[nextPlayerIndex].id,
-        lastPlay: { playType: "single", cards }, // Simplified for now
+        lastPlay: newPlay,
         gameStatus: winner ? "finished" : "playing",
         winner,
+        gameHistory: [...prev.gameHistory, { ...newPlay, timestamp: Date.now() }],
       };
     });
   };
