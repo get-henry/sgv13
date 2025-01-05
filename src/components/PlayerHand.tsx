@@ -34,24 +34,22 @@ export const PlayerHand = ({
       ? localSelectedCards.filter(c => c !== card)
       : [...localSelectedCards, card];
 
-    console.log("Updated selection:", updatedSelection);
-    
     setLocalSelectedCards(updatedSelection);
     onCardSelect(updatedSelection);
   };
 
   const containerStyles = {
-    bottom: "bottom-4 left-1/2 -translate-x-1/2",
-    left: "left-32 top-1/2 -translate-y-1/2 rotate-90",
-    top: "top-4 left-1/2 -translate-x-1/2 rotate-180",
-    right: "right-32 top-1/2 -translate-y-1/2 -rotate-90",
+    bottom: "bottom-8 left-1/2 -translate-x-1/2",
+    left: "left-8 top-1/2 -translate-y-1/2 rotate-90",
+    top: "top-8 left-1/2 -translate-x-1/2 rotate-180",
+    right: "right-8 top-1/2 -translate-y-1/2 -rotate-90",
   }[position];
 
   const nameStyles = {
-    bottom: "bottom-40 left-1/2 -translate-x-1/2",
-    left: "left-4 top-1/2 -translate-y-1/2",
-    top: "top-40 left-1/2 -translate-x-1/2",
-    right: "right-4 top-1/2 -translate-y-1/2",
+    bottom: "bottom-32 left-1/2 -translate-x-1/2",
+    left: "left-32 top-1/2 -translate-y-1/2",
+    top: "top-32 left-1/2 -translate-x-1/2",
+    right: "right-32 top-1/2 -translate-y-1/2",
   }[position];
 
   return (

@@ -19,7 +19,6 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
   const handleCardSelect = (cards: Card[]) => {
     setSelectedCards(cards);
-    console.log("Selected cards:", cards);
   };
 
   const validatePlay = (cards: Card[]): string | null => {
@@ -49,12 +48,10 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       return;
     }
 
-    console.log("Playing cards:", selectedCards);
     onPlay(selectedCards);
     setSelectedCards([]);
   };
 
-  // Show game status messages
   useEffect(() => {
     if (gameState.gameStatus === "finished" && gameState.winner) {
       const winner = gameState.players.find(p => p.id === gameState.winner);
@@ -64,29 +61,31 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
-      {/* Center table area for last play */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-xl bg-black/10 backdrop-blur-sm"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <AnimatePresence mode="wait">
-          {gameState.lastPlay && (
-            <motion.div 
-              className="flex gap-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {gameState.lastPlay.cards.map(card => (
-                <PlayingCard key={card.id} card={card} isPlayable={false} />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {/* Center playing field */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] flex items-center justify-center">
+        <motion.div
+          className="p-8 rounded-xl bg-black/10 backdrop-blur-sm"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <AnimatePresence mode="wait">
+            {gameState.lastPlay && (
+              <motion.div 
+                className="flex gap-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {gameState.lastPlay.cards.map(card => (
+                  <PlayingCard key={card.id} card={card} isPlayable={false} />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
 
       {/* Player hands */}
       {gameState.players.map((player, index) => {
@@ -94,32 +93,22 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         const isCurrentPlayer = player.id === gameState.currentPlayerId;
         
         return (
-          <div key={player.id} className="relative">
-            {/* Current player indicator */}
-            {isCurrentPlayer && (
-              <motion.div
-                className="absolute inset-0 bg-blue-500/20 rounded-xl z-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-            )}
-            <PlayerHand
-              cards={player.cards}
-              isCurrentPlayer={isCurrentPlayer}
-              selectedCards={selectedCards}
-              onCardSelect={handleCardSelect}
-              lastPlay={gameState.lastPlay}
-              position={position}
-              playerName={player.name}
-            />
-          </div>
+          <PlayerHand
+            key={player.id}
+            cards={player.cards}
+            isCurrentPlayer={isCurrentPlayer}
+            selectedCards={selectedCards}
+            onCardSelect={handleCardSelect}
+            lastPlay={gameState.lastPlay}
+            position={position}
+            playerName={player.name}
+          />
         );
       })}
 
       {/* Action buttons */}
       {currentPlayer && gameState.gameStatus === "playing" && (
-        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-10">
+        <div className="absolute bottom-40 left-1/2 -translate-x-1/2 flex gap-4 z-30">
           <Button
             variant="secondary"
             onClick={handlePlay}
