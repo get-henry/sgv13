@@ -16,6 +16,7 @@ interface GameTableProps {
 export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
+  const isFirstPlay = gameState.gameHistory.length === 0;
 
   useEffect(() => {
     // Clear selected cards when current player changes
@@ -41,13 +42,13 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       return "Invalid card combination";
     }
 
-    // Check if it's the first play and contains 3 of Spades
-    if (!gameState.lastPlay) {
+    // Check if it's the first play of the game and contains 3 of Spades
+    if (isFirstPlay) {
       const hasThreeOfSpades = cards.some(card => card.suit === "spade" && card.rank === "3");
       if (!hasThreeOfSpades) {
         return "First play must include 3 of Spades";
       }
-    } else if (gameState.lastPlay.playType !== playType) {
+    } else if (gameState.lastPlay && gameState.lastPlay.playType !== playType) {
       // Check if it's a valid chomp of 2s
       const isChompingTwos = gameState.lastPlay.cards.every(card => card.rank === "2");
       if (!isChompingTwos) {
@@ -61,11 +62,9 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       }
     }
 
-    if (!isValidPlay(cards, gameState.lastPlay)) {
-      if (gameState.lastPlay) {
-        return "Selected cards must be stronger than the last play";
-      }
-      return "Invalid card combination";
+    // Only validate against last play if there is one (after 3 passes, lastPlay will be null)
+    if (gameState.lastPlay && !isValidPlay(cards, gameState.lastPlay)) {
+      return "Selected cards must be stronger than the last play";
     }
 
     return null;
