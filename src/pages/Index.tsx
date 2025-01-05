@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { GameState, Card } from "@/types/game";
 import { GameTable } from "@/components/GameTable";
-import { createDeck, shuffleDeck, dealCards, findStartingPlayer } from "@/utils/gameUtils";
+import { createDeck, shuffleDeck, dealCards, findStartingPlayer, getPlayType } from "@/utils/gameUtils";
 import { determineAIPlay } from "@/utils/aiUtils";
 import { toast } from "sonner";
 
