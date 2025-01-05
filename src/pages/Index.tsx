@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { GameState, Card } from "@/types/game";
 import { GameTable } from "@/components/GameTable";
 import { createDeck, shuffleDeck, dealCards, findStartingPlayer } from "@/utils/gameUtils";
+import { determineAIPlay } from "@/utils/aiUtils";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -22,6 +23,30 @@ const Index = () => {
   useEffect(() => {
     startNewGame();
   }, []);
+
+  // Effect to handle AI turns
+  useEffect(() => {
+    if (gameState.gameStatus !== "playing") return;
+    
+    const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
+    if (!currentPlayer?.isAI) return;
+
+    // Add a small delay to make AI moves feel more natural
+    const timeoutId = setTimeout(() => {
+      console.log('AI Turn - Processing move for:', currentPlayer.name);
+      const aiPlay = determineAIPlay(gameState, currentPlayer.id);
+      
+      if (aiPlay) {
+        console.log('AI is playing:', aiPlay);
+        handlePlay(aiPlay);
+      } else {
+        console.log('AI is passing');
+        handlePass();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [gameState.currentPlayerId, gameState.gameStatus]);
 
   const startNewGame = () => {
     const deck = shuffleDeck(createDeck());
@@ -60,6 +85,7 @@ const Index = () => {
   };
 
   const handlePlay = (cards: Card[]) => {
+    console.log('Processing play:', cards);
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
@@ -102,6 +128,7 @@ const Index = () => {
   };
 
   const handlePass = () => {
+    console.log('Player passing turn');
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
