@@ -1,5 +1,12 @@
 import { Card, PlayType } from "@/types/game";
-import { sortCards } from "./cardUtils";
+
+export const compareCards = (card1: Card, card2: Card): number => {
+  return card1.order - card2.order;
+};
+
+export const sortCards = (cards: Card[]): Card[] => {
+  return [...cards].sort(compareCards);
+};
 
 export const dealCards = (deck: Card[]): Card[][] => {
   const hands: Card[][] = [[], [], [], []];
