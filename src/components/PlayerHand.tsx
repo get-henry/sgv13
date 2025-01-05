@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, PlayType } from "@/types/game";
 import { PlayingCard } from "./PlayingCard";
 import { isValidPlay, sortCards } from "@/utils/gameUtils";
@@ -26,6 +26,12 @@ export const PlayerHand = ({
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
   const sortedCards = sortCards(cards);
 
+  useEffect(() => {
+    if (!isCurrentPlayer) {
+      setLocalSelectedCards([]);
+    }
+  }, [isCurrentPlayer]);
+
   const toggleCardSelection = (card: Card) => {
     if (!isCurrentPlayer) return;
 
@@ -39,17 +45,17 @@ export const PlayerHand = ({
   };
 
   const containerStyles = {
-    bottom: "bottom-8 left-1/2 -translate-x-1/2",
-    left: "left-8 top-1/2 -translate-y-1/2 rotate-90",
-    top: "top-8 left-1/2 -translate-x-1/2 rotate-180",
-    right: "right-8 top-1/2 -translate-y-1/2 -rotate-90",
+    bottom: "bottom-16 left-1/2 -translate-x-1/2",
+    left: "left-16 top-1/2 -translate-y-1/2 rotate-90",
+    top: "top-16 left-1/2 -translate-x-1/2 rotate-180",
+    right: "right-16 top-1/2 -translate-y-1/2 -rotate-90",
   }[position];
 
   const nameStyles = {
-    bottom: "bottom-32 left-1/2 -translate-x-1/2",
-    left: "left-32 top-1/2 -translate-y-1/2",
-    top: "top-32 left-1/2 -translate-x-1/2",
-    right: "right-32 top-1/2 -translate-y-1/2",
+    bottom: "bottom-4 left-1/2 -translate-x-1/2",
+    left: "left-4 top-1/2 -translate-y-1/2",
+    top: "top-4 left-1/2 -translate-x-1/2",
+    right: "right-4 top-1/2 -translate-y-1/2",
   }[position];
 
   return (
