@@ -27,7 +27,7 @@ export interface GameState {
     cards: Card[];
     playerId: string;
   } | null;
-  gameStatus: "waiting" | "playing" | "finished";
+  gameStatus: "waiting" | "playing" | "finished" | "replay";
   winner: string | null;
   gameHistory: {
     playerId: string;

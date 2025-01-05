@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { GameState, Card } from "@/types/game";
+import { GameState, Card, GameHistoryEntry } from "@/types/game";
 import { GameTable } from "@/components/GameTable";
-import { createDeck, shuffleDeck, dealCards, findStartingPlayer, getPlayType } from "@/utils/gameUtils";
+import { Leaderboard } from "@/components/Leaderboard";
+import { createDeck, shuffleDeck } from "@/utils/cardUtils";
+import { dealCards, findStartingPlayer, getPlayType } from "@/utils/gameUtils";
 import { determineAIPlay } from "@/utils/aiUtils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -22,18 +25,19 @@ const Index = () => {
     lastPlayerId: null,
   });
 
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [completedGames, setCompletedGames] = useState<GameHistoryEntry[]>([]);
+
   useEffect(() => {
     startNewGame();
   }, []);
 
-  // Effect to handle AI turns
   useEffect(() => {
     if (gameState.gameStatus !== "playing") return;
     
     const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
     if (!currentPlayer?.isAI) return;
 
-    // Add a small delay to make AI moves feel more natural
     const timeoutId = setTimeout(() => {
       console.log('AI Turn - Processing move for:', currentPlayer.name);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
@@ -119,6 +123,19 @@ const Index = () => {
         playerId: prev.currentPlayerId,
       };
 
+      const newGameHistory = [...prev.gameHistory, { ...newPlay, timestamp: Date.now() }];
+
+      // If game is finished, save it to completed games
+      if (winner) {
+        const gameHistoryEntry: GameHistoryEntry = {
+          winner,
+          players: updatedPlayers,
+          plays: newGameHistory,
+          timestamp: Date.now(),
+        };
+        setCompletedGames(prev => [...prev, gameHistoryEntry]);
+      }
+
       return {
         ...prev,
         players: updatedPlayers,
@@ -126,7 +143,7 @@ const Index = () => {
         lastPlay: newPlay,
         gameStatus: winner ? "finished" : "playing",
         winner,
-        gameHistory: [...prev.gameHistory, { ...newPlay, timestamp: Date.now() }],
+        gameHistory: newGameHistory,
         consecutivePasses: 0,
         lastPlayerId: prev.currentPlayerId,
       };
@@ -140,7 +157,6 @@ const Index = () => {
       const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
-      // If everyone has passed, the last player who played gets to start a new round
       if (newConsecutivePasses === 3) {
         const playerToStart = prev.lastPlayerId || prev.currentPlayerId;
         return {
@@ -150,7 +166,7 @@ const Index = () => {
             isCurrentTurn: player.id === playerToStart,
           })),
           currentPlayerId: playerToStart,
-          lastPlay: null, // Reset last play so any play type is valid
+          lastPlay: null,
           consecutivePasses: 0,
         };
       }
@@ -169,13 +185,34 @@ const Index = () => {
     toast.info("Player passed");
   };
 
+  const handleReplayGame = (gameId: string) => {
+    // TODO: Implement replay functionality
+    toast.info("Replay functionality coming soon!");
+  };
+
   return (
     <div className="w-full h-screen bg-gray-900">
+      <Button
+        variant="outline"
+        className="fixed top-4 right-4 z-50"
+        onClick={() => setShowLeaderboard(true)}
+      >
+        View Leaderboard
+      </Button>
+      
       <GameTable
         gameState={gameState}
         onPlay={handlePlay}
         onPass={handlePass}
       />
+
+      {showLeaderboard && (
+        <Leaderboard
+          gameHistory={completedGames}
+          onReplayGame={handleReplayGame}
+          onClose={() => setShowLeaderboard(false)}
+        />
+      )}
     </div>
   );
 };

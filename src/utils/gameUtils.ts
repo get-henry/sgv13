@@ -1,35 +1,5 @@
-import { Card, Suit, Rank, PlayType } from "@/types/game";
-
-const SUITS: Suit[] = ["spade", "club", "diamond", "heart"];
-const RANKS: Rank[] = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2"];
-
-export const createDeck = (): Card[] => {
-  const deck: Card[] = [];
-  RANKS.forEach((rank, rankIndex) => {
-    SUITS.forEach((suit, suitIndex) => {
-      deck.push({
-        suit,
-        rank,
-        id: `${rank}-${suit}`,
-        order: rankIndex * 4 + suitIndex,
-      });
-    });
-  });
-  return deck;
-};
-
-export const shuffleDeck = (deck: Card[]): Card[] => {
-  const shuffled = [...deck];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-export const sortCards = (cards: Card[]): Card[] => {
-  return [...cards].sort((a, b) => a.order - b.order);
-};
+import { Card, PlayType } from "@/types/game";
+import { sortCards } from "./cardUtils";
 
 export const dealCards = (deck: Card[]): Card[][] => {
   const hands: Card[][] = [[], [], [], []];
@@ -39,14 +9,10 @@ export const dealCards = (deck: Card[]): Card[][] => {
   return hands.map((hand) => sortCards(hand));
 };
 
-export const compareCards = (card1: Card, card2: Card): number => {
-  const rank1Index = RANKS.indexOf(card1.rank);
-  const rank2Index = RANKS.indexOf(card2.rank);
-  if (rank1Index !== rank2Index) return rank1Index - rank2Index;
-  
-  const suit1Index = SUITS.indexOf(card1.suit);
-  const suit2Index = SUITS.indexOf(card2.suit);
-  return suit1Index - suit2Index;
+export const findStartingPlayer = (hands: Card[][]): number => {
+  return hands.findIndex(hand => 
+    hand.some(card => card.suit === "spade" && card.rank === "3")
+  );
 };
 
 export const getPlayType = (cards: Card[]): PlayType | null => {
@@ -66,7 +32,6 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
     return "four";
   }
   
-  // Add more play type validations here
   return null;
 };
 
@@ -88,10 +53,4 @@ export const isValidPlay = (
   );
   
   return compareCards(highestNewCard, highestLastCard) > 0;
-};
-
-export const findStartingPlayer = (hands: Card[][]): number => {
-  return hands.findIndex(hand => 
-    hand.some(card => card.suit === "diamond" && card.rank === "3")
-  );
 };
