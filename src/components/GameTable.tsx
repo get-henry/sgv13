@@ -47,6 +47,18 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       if (!hasThreeOfSpades) {
         return "First play must include 3 of Spades";
       }
+    } else if (gameState.lastPlay.playType !== playType) {
+      // Check if it's a valid chomp of 2s
+      const isChompingTwos = gameState.lastPlay.cards.every(card => card.rank === "2");
+      if (!isChompingTwos) {
+        return `Must play the same type as the last play (${gameState.lastPlay.playType})`;
+      }
+      
+      // Validate chomp rules
+      const isValidChomp = validateChompPlay(cards, gameState.lastPlay);
+      if (!isValidChomp) {
+        return "Invalid chomp play";
+      }
     }
 
     if (!isValidPlay(cards, gameState.lastPlay)) {
@@ -57,6 +69,34 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     }
 
     return null;
+  };
+
+  const validateChompPlay = (cards: Card[], lastPlay: GameState['lastPlay']): boolean => {
+    if (!lastPlay) return false;
+    
+    const lastPlayCards = lastPlay.cards;
+    if (!lastPlayCards.every(card => card.rank === "2")) return false;
+
+    const playType = getPlayType(cards);
+    if (!playType) return false;
+
+    // Single 2 can be chomped by consecutive pairs 3,3,4,4,5,5
+    if (lastPlayCards.length === 1 && playType === "consecutive-pairs" && cards.length === 6) {
+      return true;
+    }
+
+    // Pair of 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6 or four of a kind
+    if (lastPlayCards.length === 2) {
+      if (playType === "consecutive-pairs" && cards.length === 8) return true;
+      if (playType === "four" && cards.length === 4) return true;
+    }
+
+    // Triple 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6,7,7
+    if (lastPlayCards.length === 3 && playType === "consecutive-pairs" && cards.length === 10) {
+      return true;
+    }
+
+    return false;
   };
 
   const handlePlay = () => {
@@ -75,7 +115,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
       {/* Action buttons - Moved higher up */}
       {currentPlayer && gameState.gameStatus === "playing" && (
-        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+        <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-4 z-30">
           <Button
             variant="secondary"
             onClick={handlePlay}

@@ -18,6 +18,8 @@ const Index = () => {
     gameStatus: "waiting",
     winner: null,
     gameHistory: [],
+    consecutivePasses: 0,
+    lastPlayerId: null,
   });
 
   useEffect(() => {
@@ -79,6 +81,8 @@ const Index = () => {
       gameStatus: "playing",
       winner: null,
       gameHistory: [],
+      consecutivePasses: 0,
+      lastPlayerId: null,
     }));
 
     toast.success("New game started!");
@@ -110,7 +114,7 @@ const Index = () => {
       const winner = updatedPlayers.find(p => p.cards.length === 0)?.id || null;
 
       const newPlay = {
-        playType: "single" as const,
+        playType: getPlayType(cards) || "single",
         cards,
         playerId: prev.currentPlayerId,
       };
@@ -123,6 +127,8 @@ const Index = () => {
         gameStatus: winner ? "finished" : "playing",
         winner,
         gameHistory: [...prev.gameHistory, { ...newPlay, timestamp: Date.now() }],
+        consecutivePasses: 0,
+        lastPlayerId: prev.currentPlayerId,
       };
     });
   };
@@ -132,6 +138,22 @@ const Index = () => {
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
+      const newConsecutivePasses = prev.consecutivePasses + 1;
+
+      // If everyone has passed, the last player who played gets to start a new round
+      if (newConsecutivePasses === 3) {
+        const playerToStart = prev.lastPlayerId || prev.currentPlayerId;
+        return {
+          ...prev,
+          players: prev.players.map((player, index) => ({
+            ...player,
+            isCurrentTurn: player.id === playerToStart,
+          })),
+          currentPlayerId: playerToStart,
+          lastPlay: null, // Reset last play so any play type is valid
+          consecutivePasses: 0,
+        };
+      }
 
       return {
         ...prev,
@@ -140,6 +162,7 @@ const Index = () => {
           isCurrentTurn: index === nextPlayerIndex,
         })),
         currentPlayerId: prev.players[nextPlayerIndex].id,
+        consecutivePasses: newConsecutivePasses,
       };
     });
 
