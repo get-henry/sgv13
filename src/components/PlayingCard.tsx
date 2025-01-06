@@ -33,12 +33,12 @@ export const PlayingCard = ({
       initial={{ x: -1000, rotate: -540, opacity: 0 }}
       animate={{ x: 0, rotate: 0, opacity: 1 }}
       transition={{ delay: dealDelay, duration: 0.5 }}
-      whileHover={isPlayable ? { y: -10 } : {}}
+      whileHover={isPlayable ? { y: -10 } : undefined}
       onClick={isPlayable ? onClick : undefined}
       className={cn(
-        "relative w-24 h-36 rounded-lg bg-white shadow-lg cursor-pointer transition-transform duration-300",
+        "relative w-24 h-36 rounded-lg bg-white shadow-lg transition-transform duration-300",
         isSelected ? "border-4 border-blue-500 transform -translate-y-4" : "",
-        !isPlayable && "opacity-70 cursor-default",
+        isPlayable ? "cursor-pointer" : "cursor-default",
         className
       )}
     >

@@ -23,10 +23,10 @@ const Index = () => {
     gameHistory: [],
     consecutivePasses: 0,
     lastPlayerId: null,
+    completedGames: [],
   });
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [completedGames, setCompletedGames] = useState<GameHistoryEntry[]>([]);
 
   useEffect(() => {
     startNewGame();
@@ -57,8 +57,14 @@ const Index = () => {
   const startNewGame = () => {
     const deck = shuffleDeck(createDeck());
     const hands = dealCards(deck);
-    const startingPlayerIndex = findStartingPlayer(hands);
     
+    // If it's not the first game, the winner starts
+    let startingPlayerIndex = gameState.completedGames.length === 0 
+      ? findStartingPlayer(hands)
+      : gameState.players.findIndex(p => p.id === gameState.winner);
+    
+    if (startingPlayerIndex === -1) startingPlayerIndex = 0;
+
     const rotateToBottom = (arr: any[], startIndex: number) => {
       if (startIndex === 0) return arr;
       const rotated = [...arr];
@@ -133,7 +139,10 @@ const Index = () => {
           plays: newGameHistory,
           timestamp: Date.now(),
         };
-        setCompletedGames(prev => [...prev, gameHistoryEntry]);
+        setGameState(prev => ({
+          ...prev,
+          completedGames: [...prev.completedGames, gameHistoryEntry],
+        }));
       }
 
       return {
@@ -208,7 +217,7 @@ const Index = () => {
 
       {showLeaderboard && (
         <Leaderboard
-          gameHistory={completedGames}
+          gameHistory={gameState.completedGames}
           onReplayGame={handleReplayGame}
           onClose={() => setShowLeaderboard(false)}
         />

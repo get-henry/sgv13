@@ -16,7 +16,8 @@ interface GameTableProps {
 export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-  const isFirstPlay = gameState.gameHistory.length === 0;
+  const isFirstGame = gameState.completedGames.length === 0;
+  const isFirstPlay = isFirstGame && gameState.gameHistory.length === 0;
 
   useEffect(() => {
     // Clear selected cards when current player changes
@@ -29,20 +30,16 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   };
 
   const validatePlay = (cards: Card[]): string | null => {
-    console.log("Validating play:", cards);
-    
     if (!cards.length) {
       return "Please select cards to play";
     }
 
     const playType = getPlayType(cards);
-    console.log("Play type detected:", playType);
-    
     if (!playType) {
       return "Invalid card combination";
     }
 
-    // Check if it's the first play of the game and contains 3 of Spades
+    // Check if it's the first play of the first game and contains 3 of Spades
     if (isFirstPlay) {
       const hasThreeOfSpades = cards.some(card => card.suit === "spade" && card.rank === "3");
       if (!hasThreeOfSpades) {
@@ -55,14 +52,13 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
         return `Must play the same type as the last play (${gameState.lastPlay.playType})`;
       }
       
-      // Validate chomp rules
       const isValidChomp = validateChompPlay(cards, gameState.lastPlay);
       if (!isValidChomp) {
         return "Invalid chomp play";
       }
     }
 
-    // Only validate against last play if there is one (after 3 passes, lastPlay will be null)
+    // Only validate against last play if there is one
     if (gameState.lastPlay && !isValidPlay(cards, gameState.lastPlay)) {
       return "Selected cards must be stronger than the last play";
     }
@@ -112,7 +108,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
-      {/* Action buttons - Moved higher up */}
+      {/* Action buttons */}
       {currentPlayer && gameState.gameStatus === "playing" && (
         <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-4 z-30">
           <Button
@@ -136,7 +132,9 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] flex flex-col items-center justify-center">
         {gameState.lastPlay && (
           <div className="text-white mb-4 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg">
-            Current Play: {gameState.lastPlay.playType}
+            Current Play: {gameState.lastPlay.playType} by {
+              gameState.players.find(p => p.id === gameState.lastPlayerId)?.name
+            }
           </div>
         )}
         <motion.div

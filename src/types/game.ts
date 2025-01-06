@@ -37,6 +37,7 @@ export interface GameState {
   }[];
   consecutivePasses: number;
   lastPlayerId: string | null;
+  completedGames: GameHistoryEntry[];
 }
 
 export interface GameHistoryEntry {
