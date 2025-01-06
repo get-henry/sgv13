@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Card, Player, GameState, PlayType } from "@/types/game";
+import { Card, Player, GameState } from "@/types/game";
 import { PlayerHand } from "./PlayerHand";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { isValidPlay, getPlayType } from "@/utils/gameUtils";
-import { PlayingCard } from "./PlayingCard";
+import { isValidPlay } from "@/utils/gameUtils";
+import { GameStatus } from "./GameStatus";
+import { PlayArea } from "./PlayArea";
+import { GameControls } from "./GameControls";
 
 interface GameTableProps {
   gameState: GameState;
@@ -17,24 +19,20 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [animatingCards, setAnimatingCards] = useState<Card[]>([]);
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-  const isFirstGame = gameState.completedGames.length === 0;
-  const isFirstPlay = isFirstGame && gameState.gameHistory.length === 0;
-
+  
   useEffect(() => {
-    // Clear selected cards when current player changes
     setSelectedCards([]);
   }, [gameState.currentPlayerId]);
 
   const handleCardSelect = (cards: Card[]) => {
-    console.log("Selected cards:", cards);
+    if (currentPlayer?.hasPassed) return;
     setSelectedCards(cards);
   };
 
   const validatePlay = (cards: Card[]): string | null => {
-    if (!cards.length) {
-      return "Please select cards to play";
-    }
-
+    if (!cards.length) return "Please select cards to play";
+    if (currentPlayer?.hasPassed) return "You have passed this round";
+    
     const playType = getPlayType(cards);
     if (!playType) {
       return "Invalid card combination";
@@ -67,36 +65,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     return null;
   };
 
-  const validateChompPlay = (cards: Card[], lastPlay: GameState['lastPlay']): boolean => {
-    if (!lastPlay) return false;
-    
-    const lastPlayCards = lastPlay.cards;
-    if (!lastPlayCards.every(card => card.rank === "2")) return false;
-
-    const playType = getPlayType(cards);
-    if (!playType) return false;
-
-    // Single 2 can be chomped by consecutive pairs 3,3,4,4,5,5
-    if (lastPlayCards.length === 1 && playType === "consecutive-pairs" && cards.length === 6) {
-      return true;
-    }
-
-    // Pair of 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6 or four of a kind
-    if (lastPlayCards.length === 2) {
-      if (playType === "consecutive-pairs" && cards.length === 8) return true;
-      if (playType === "four" && cards.length === 4) return true;
-    }
-
-    // Triple 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6,7,7
-    if (lastPlayCards.length === 3 && playType === "consecutive-pairs" && cards.length === 10) {
-      return true;
-    }
-
-    return false;
-  };
-
   const handlePlay = () => {
-    console.log("Attempting to play cards:", selectedCards);
     const error = validatePlay(selectedCards);
     if (error) {
       toast.error(error);
@@ -104,90 +73,53 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     }
 
     setAnimatingCards(selectedCards);
-    
-    // Delay the actual play until animation completes
     setTimeout(() => {
       onPlay(selectedCards);
       setSelectedCards([]);
       setAnimatingCards([]);
-    }, 500); // Match this with animation duration
+    }, 500);
   };
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
-      {/* Action buttons */}
-      {currentPlayer && gameState.gameStatus === "playing" && (
-        <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-4 z-30">
-          <Button
-            variant="secondary"
-            onClick={handlePlay}
-            className="px-8 py-4 text-lg font-semibold bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-          >
-            Play
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onPass}
-            className="px-8 py-4 text-lg font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            Pass
-          </Button>
-        </div>
-      )}
+      <GameControls
+        isCurrentPlayer={currentPlayer?.id === gameState.currentPlayerId}
+        gameStatus={gameState.gameStatus}
+        onPlay={handlePlay}
+        onPass={onPass}
+      />
 
-      {/* Center playing field */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] flex flex-col items-center justify-center">
-        {(gameState.lastPlay || animatingCards.length > 0) && (
-          <div className="text-white mb-4 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg">
-            Current Play: {gameState.lastPlay?.playType || getPlayType(animatingCards)} by {
-              gameState.players.find(p => p.id === (gameState.lastPlayerId || gameState.currentPlayerId))?.name
-            }
-          </div>
-        )}
-        <motion.div
-          className="p-8 rounded-xl bg-black/10 backdrop-blur-sm"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <AnimatePresence mode="wait">
-            {(gameState.lastPlay || animatingCards.length > 0) && (
-              <motion.div 
-                className="flex gap-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {(animatingCards.length > 0 ? animatingCards : gameState.lastPlay?.cards || []).map(card => (
-                  <PlayingCard key={card.id} card={card} isPlayable={false} />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
+      <PlayArea
+        lastPlay={gameState.lastPlay}
+        animatingCards={animatingCards}
+        currentPlayerId={gameState.currentPlayerId}
+        players={gameState.players}
+      />
 
-      {/* Player hands */}
       {gameState.players.map((player, index) => {
         const position = ["bottom", "left", "top", "right"][index] as "bottom" | "left" | "top" | "right";
         const isCurrentPlayer = player.id === gameState.currentPlayerId;
         
         return (
-          <PlayerHand
-            key={player.id}
-            cards={player.cards}
-            isCurrentPlayer={isCurrentPlayer}
-            selectedCards={selectedCards}
-            onCardSelect={handleCardSelect}
-            lastPlay={gameState.lastPlay}
-            position={position}
-            playerName={player.name}
-          />
+          <div key={player.id} className="relative">
+            <GameStatus
+              player={player}
+              isCurrentPlayer={isCurrentPlayer}
+              hasPassed={player.hasPassed || false}
+            />
+            <PlayerHand
+              cards={player.cards}
+              isCurrentPlayer={isCurrentPlayer}
+              selectedCards={selectedCards}
+              onCardSelect={handleCardSelect}
+              lastPlay={gameState.lastPlay}
+              position={position}
+              playerName={player.name}
+            />
+          </div>
         );
       })}
 
-      {/* Game over overlay */}
       {gameState.gameStatus === "finished" && (
         <motion.div 
           className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"

@@ -23,6 +23,9 @@ export const Leaderboard = ({ gameHistory, onReplayGame, onClose }: LeaderboardP
       .map(([name, wins]) => ({ name, wins }));
   };
 
+  const lastGame = gameHistory[gameHistory.length - 1];
+  const lastWinner = lastGame?.players.find(p => p.id === lastGame.winner);
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
@@ -34,6 +37,13 @@ export const Leaderboard = ({ gameHistory, onReplayGame, onClose }: LeaderboardP
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
       >
+        {lastWinner && (
+          <div className="mb-6 p-4 bg-green-100 rounded-lg">
+            <h3 className="text-lg font-semibold text-green-800">Last Game Winner</h3>
+            <p className="text-green-700">{lastWinner.name}</p>
+          </div>
+        )}
+
         <h2 className="text-2xl font-bold mb-6">Leaderboard</h2>
         
         <div className="mb-8">
