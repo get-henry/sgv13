@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, PlayType } from "@/types/game";
 import { PlayingCard } from "./PlayingCard";
-import { isValidPlay, sortCards } from "@/utils/gameUtils";
+import { isValidPlay } from "@/utils/gameUtils";
 import { motion } from "framer-motion";
+import { GameStatus } from "./GameStatus";
 
 interface PlayerHandProps {
   cards: Card[];
@@ -12,6 +13,7 @@ interface PlayerHandProps {
   lastPlay: { playType: PlayType; cards: Card[] } | null;
   position: "bottom" | "left" | "top" | "right";
   playerName: string;
+  hasPassed: boolean;
 }
 
 export const PlayerHand = ({
@@ -22,9 +24,10 @@ export const PlayerHand = ({
   lastPlay,
   position,
   playerName,
+  hasPassed,
 }: PlayerHandProps) => {
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
-  const sortedCards = sortCards(cards);
+  const sortedCards = [...cards].sort((a, b) => a.order - b.order);
 
   useEffect(() => {
     if (!isCurrentPlayer) {
@@ -33,7 +36,7 @@ export const PlayerHand = ({
   }, [isCurrentPlayer]);
 
   const toggleCardSelection = (card: Card) => {
-    if (!isCurrentPlayer) return;
+    if (!isCurrentPlayer || hasPassed) return;
 
     const isAlreadySelected = localSelectedCards.includes(card);
     const updatedSelection = isAlreadySelected
@@ -61,16 +64,15 @@ export const PlayerHand = ({
   return (
     <>
       <motion.div
-        className={`absolute ${nameStyles} px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg text-white z-20`}
+        className={`absolute ${nameStyles} z-20`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {playerName}
-        {isCurrentPlayer && (
-          <span className="ml-2 px-2 py-1 bg-blue-500 rounded-full text-xs">
-            Your Turn
-          </span>
-        )}
+        <GameStatus 
+          playerName={playerName}
+          hasPassed={hasPassed}
+          isCurrentPlayer={isCurrentPlayer}
+        />
       </motion.div>
       <motion.div
         className={`absolute ${containerStyles} flex gap-2 w-auto max-w-[600px] overflow-visible z-10`}
@@ -83,7 +85,7 @@ export const PlayerHand = ({
             key={card.id}
             card={card}
             isSelected={localSelectedCards.includes(card)}
-            isPlayable={isCurrentPlayer}
+            isPlayable={isCurrentPlayer && !hasPassed}
             onClick={() => toggleCardSelection(card)}
             dealDelay={index * 0.1}
             className={position === "left" || position === "right" ? "rotate-90" : ""}

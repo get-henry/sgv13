@@ -1,5 +1,4 @@
 import { Card, PlayType } from "@/types/game";
-import { RANKS } from "./cardUtils";
 
 export const isValidPlay = (
   selectedCards: Card[],
@@ -40,12 +39,10 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
 
   // Check for straight (3 or more consecutive cards)
   if (cards.length >= 3) {
-    const sortedCards = [...cards].sort((a, b) => RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank));
+    const sortedCards = [...cards].sort((a, b) => a.order - b.order);
     let isConsecutive = true;
     for (let i = 1; i < sortedCards.length; i++) {
-      const prevRankIndex = RANKS.indexOf(sortedCards[i - 1].rank);
-      const currentRankIndex = RANKS.indexOf(sortedCards[i].rank);
-      if (currentRankIndex - prevRankIndex !== 1) {
+      if (sortedCards[i].order - sortedCards[i - 1].order !== 1) {
         isConsecutive = false;
         break;
       }
@@ -58,10 +55,6 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
 
 export const compareCards = (card1: Card, card2: Card): number => {
   return card1.order - card2.order;
-};
-
-export const sortCards = (cards: Card[]): Card[] => {
-  return [...cards].sort((a, b) => a.order - b.order);
 };
 
 export const dealCards = (deck: Card[]): Card[][] => {
@@ -79,4 +72,32 @@ export const findStartingPlayer = (hands: Card[][]): number => {
     }
   }
   return 0;
+};
+
+export const validateChompPlay = (cards: Card[], lastPlay: { playType: PlayType; cards: Card[] } | null): boolean => {
+  if (!lastPlay) return false;
+  
+  const lastPlayCards = lastPlay.cards;
+  if (!lastPlayCards.every(card => card.rank === "2")) return false;
+
+  const playType = getPlayType(cards);
+  if (!playType) return false;
+
+  // Single 2 can be chomped by consecutive pairs 3,3,4,4,5,5
+  if (lastPlayCards.length === 1 && playType === "consecutive-pairs" && cards.length === 6) {
+    return true;
+  }
+
+  // Pair of 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6 or four of a kind
+  if (lastPlayCards.length === 2) {
+    if (playType === "consecutive-pairs" && cards.length === 8) return true;
+    if (playType === "four" && cards.length === 4) return true;
+  }
+
+  // Triple 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6,7,7
+  if (lastPlayCards.length === 3 && playType === "consecutive-pairs" && cards.length === 10) {
+    return true;
+  }
+
+  return false;
 };
