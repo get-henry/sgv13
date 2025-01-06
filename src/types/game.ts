@@ -15,6 +15,7 @@ export interface Player {
   isCurrentTurn: boolean;
   isAI: boolean;
   gamesWon: number;
+  hasPassed?: boolean;
 }
 
 export type PlayType = "single" | "pair" | "triple" | "four" | "straight" | "consecutive-pairs";

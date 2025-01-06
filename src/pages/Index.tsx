@@ -113,6 +113,7 @@ const Index = () => {
             ...player,
             cards: remainingCards,
             isCurrentTurn: false,
+            hasPassed: false,
           };
         }
         if (player.id === prev.players[nextPlayerIndex].id) {
@@ -166,26 +167,34 @@ const Index = () => {
       const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
+      // If all players have passed except the last player who played
       if (newConsecutivePasses === 3) {
-        const playerToStart = prev.lastPlayerId || prev.currentPlayerId;
+        // Reset all players' pass status and start new round
         return {
           ...prev,
-          players: prev.players.map((player, index) => ({
+          players: prev.players.map(player => ({
             ...player,
-            isCurrentTurn: player.id === playerToStart,
+            isCurrentTurn: player.id === prev.lastPlayerId,
+            hasPassed: false
           })),
-          currentPlayerId: playerToStart,
+          currentPlayerId: prev.lastPlayerId || prev.currentPlayerId,
           lastPlay: null,
           consecutivePasses: 0,
         };
       }
 
+      // Mark current player as passed and move to next player
       return {
         ...prev,
-        players: prev.players.map((player, index) => ({
-          ...player,
-          isCurrentTurn: index === nextPlayerIndex,
-        })),
+        players: prev.players.map(player => {
+          if (player.id === prev.currentPlayerId) {
+            return { ...player, hasPassed: true, isCurrentTurn: false };
+          }
+          if (player.id === prev.players[nextPlayerIndex].id) {
+            return { ...player, isCurrentTurn: true };
+          }
+          return player;
+        }),
         currentPlayerId: prev.players[nextPlayerIndex].id,
         consecutivePasses: newConsecutivePasses,
       };

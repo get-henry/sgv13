@@ -15,6 +15,7 @@ interface GameTableProps {
 
 export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  const [animatingCards, setAnimatingCards] = useState<Card[]>([]);
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const isFirstGame = gameState.completedGames.length === 0;
   const isFirstPlay = isFirstGame && gameState.gameHistory.length === 0;
@@ -102,8 +103,14 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       return;
     }
 
-    onPlay(selectedCards);
-    setSelectedCards([]);
+    setAnimatingCards(selectedCards);
+    
+    // Delay the actual play until animation completes
+    setTimeout(() => {
+      onPlay(selectedCards);
+      setSelectedCards([]);
+      setAnimatingCards([]);
+    }, 500); // Match this with animation duration
   };
 
   return (
@@ -130,10 +137,10 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
       {/* Center playing field */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] flex flex-col items-center justify-center">
-        {gameState.lastPlay && (
+        {(gameState.lastPlay || animatingCards.length > 0) && (
           <div className="text-white mb-4 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg">
-            Current Play: {gameState.lastPlay.playType} by {
-              gameState.players.find(p => p.id === gameState.lastPlayerId)?.name
+            Current Play: {gameState.lastPlay?.playType || getPlayType(animatingCards)} by {
+              gameState.players.find(p => p.id === (gameState.lastPlayerId || gameState.currentPlayerId))?.name
             }
           </div>
         )}
@@ -144,7 +151,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
           transition={{ duration: 0.5 }}
         >
           <AnimatePresence mode="wait">
-            {gameState.lastPlay && (
+            {(gameState.lastPlay || animatingCards.length > 0) && (
               <motion.div 
                 className="flex gap-2"
                 initial={{ opacity: 0, y: 20 }}
@@ -152,7 +159,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {gameState.lastPlay.cards.map(card => (
+                {(animatingCards.length > 0 ? animatingCards : gameState.lastPlay?.cards || []).map(card => (
                   <PlayingCard key={card.id} card={card} isPlayable={false} />
                 ))}
               </motion.div>
