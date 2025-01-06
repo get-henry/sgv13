@@ -59,3 +59,24 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
 export const compareCards = (card1: Card, card2: Card): number => {
   return card1.order - card2.order;
 };
+
+export const sortCards = (cards: Card[]): Card[] => {
+  return [...cards].sort((a, b) => a.order - b.order);
+};
+
+export const dealCards = (deck: Card[]): Card[][] => {
+  const hands: Card[][] = [[], [], [], []];
+  deck.forEach((card, index) => {
+    hands[index % 4].push(card);
+  });
+  return hands;
+};
+
+export const findStartingPlayer = (hands: Card[][]): number => {
+  for (let i = 0; i < hands.length; i++) {
+    if (hands[i].some(card => card.suit === "spade" && card.rank === "3")) {
+      return i;
+    }
+  }
+  return 0;
+};
