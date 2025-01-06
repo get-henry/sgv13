@@ -183,6 +183,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
             lastPlay={gameState.lastPlay}
             position={position}
             playerName={player.name}
+            hasPassed={player.hasPassed || false}
           />
         );
       })}
