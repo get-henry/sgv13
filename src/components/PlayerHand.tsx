@@ -57,8 +57,8 @@ export const PlayerHand = ({
   const nameStyles = {
     bottom: "bottom-4 left-1/2 -translate-x-1/2",
     left: "left-4 top-1/2 -translate-y-1/2 rotate-90",
-    top: "top-4 left-1/2 -translate-x-1/2 rotate-180",
-    right: "right-4 top-1/2 -translate-y-1/2",
+    top: "top-4 left-1/2 -translate-x-1/2",
+    right: "right-4 top-1/2 -translate-y-1/2 rotate-180",
   }[position];
 
   return (
