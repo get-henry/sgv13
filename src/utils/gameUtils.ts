@@ -101,3 +101,21 @@ export const validateChompPlay = (cards: Card[], lastPlay: { playType: PlayType;
 
   return false;
 };
+
+export const findNextActivePlayer = (players: Player[], currentPlayerIndex: number): number => {
+  let nextIndex = currentPlayerIndex;
+  let loopCount = 0;
+  
+  // Loop through players until we find one who hasn't passed or we've checked everyone
+  do {
+    nextIndex = (nextIndex + 1) % players.length;
+    loopCount++;
+    
+    // If we've checked all players, return the current player
+    if (loopCount >= players.length) {
+      return currentPlayerIndex;
+    }
+  } while (players[nextIndex].hasPassed);
+  
+  return nextIndex;
+};

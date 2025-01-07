@@ -3,7 +3,7 @@ import { GameState, Card, GameHistoryEntry } from "@/types/game";
 import { GameTable } from "@/components/GameTable";
 import { Leaderboard } from "@/components/Leaderboard";
 import { createDeck, shuffleDeck } from "@/utils/cardUtils";
-import { dealCards, findStartingPlayer, getPlayType } from "@/utils/gameUtils";
+import { dealCards, findStartingPlayer, getPlayType, findNextActivePlayer } from "@/utils/gameUtils";
 import { determineAIPlay } from "@/utils/aiUtils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ const Index = () => {
     console.log('Processing play:', cards);
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
-      const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
+      const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
 
       const updatedPlayers = prev.players.map(player => {
         if (player.id === prev.currentPlayerId) {
@@ -132,7 +132,6 @@ const Index = () => {
 
       const newGameHistory = [...prev.gameHistory, { ...newPlay, timestamp: Date.now() }];
 
-      // If game is finished, save it to completed games
       if (winner) {
         const gameHistoryEntry: GameHistoryEntry = {
           winner,
@@ -140,10 +139,22 @@ const Index = () => {
           plays: newGameHistory,
           timestamp: Date.now(),
         };
-        setGameState(prev => ({
+        return {
           ...prev,
+          players: updatedPlayers.map(p => ({
+            ...p,
+            gamesWon: p.id === winner ? p.gamesWon + 1 : p.gamesWon,
+            hasPassed: false,
+          })),
+          currentPlayerId: prev.players[nextPlayerIndex].id,
+          lastPlay: newPlay,
+          gameStatus: "finished",
+          winner,
+          gameHistory: newGameHistory,
+          consecutivePasses: 0,
+          lastPlayerId: prev.currentPlayerId,
           completedGames: [...prev.completedGames, gameHistoryEntry],
-        }));
+        };
       }
 
       return {
@@ -151,8 +162,8 @@ const Index = () => {
         players: updatedPlayers,
         currentPlayerId: prev.players[nextPlayerIndex].id,
         lastPlay: newPlay,
-        gameStatus: winner ? "finished" : "playing",
-        winner,
+        gameStatus: "playing",
+        winner: null,
         gameHistory: newGameHistory,
         consecutivePasses: 0,
         lastPlayerId: prev.currentPlayerId,
@@ -164,7 +175,7 @@ const Index = () => {
     console.log('Player passing turn');
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
-      const nextPlayerIndex = (currentPlayerIndex + 1) % 4;
+      const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
       // If all players have passed except the last player who played
