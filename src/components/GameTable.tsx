@@ -115,9 +115,9 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
-      {/* Action buttons */}
+      {/* Action buttons - Repositioned above player's hand */}
       {currentPlayer && gameState.gameStatus === "playing" && (
-        <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-30">
           <Button
             variant="secondary"
             onClick={handlePlay}
