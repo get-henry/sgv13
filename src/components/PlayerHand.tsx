@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, PlayType } from "@/types/game";
 import { PlayingCard } from "./PlayingCard";
+import { isValidPlay } from "@/utils/gameUtils";
 import { motion } from "framer-motion";
 import { GameStatus } from "./GameStatus";
-import { cn } from "@/lib/utils";
 
 interface PlayerHandProps {
   cards: Card[];
@@ -14,7 +14,6 @@ interface PlayerHandProps {
   position: "bottom" | "left" | "top" | "right";
   playerName: string;
   hasPassed: boolean;
-  className?: string;
 }
 
 export const PlayerHand = ({
@@ -26,7 +25,6 @@ export const PlayerHand = ({
   position,
   playerName,
   hasPassed,
-  className,
 }: PlayerHandProps) => {
   const [localSelectedCards, setLocalSelectedCards] = useState<Card[]>([]);
   const sortedCards = [...cards].sort((a, b) => a.order - b.order);
@@ -77,10 +75,7 @@ export const PlayerHand = ({
         />
       </motion.div>
       <motion.div
-        className={cn(
-          `absolute ${containerStyles} flex gap-2 w-auto max-w-[600px] overflow-visible z-10`,
-          className
-        )}
+        className={`absolute ${containerStyles} flex gap-2 w-auto max-w-[600px] overflow-visible z-10`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}

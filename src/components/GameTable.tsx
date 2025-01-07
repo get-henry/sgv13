@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, Player, GameState, PlayType } from "@/types/game";
 import { PlayerHand } from "./PlayerHand";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { isValidPlay, getPlayType } from "@/utils/gameUtils";
-import { ActionButtons } from "./game/ActionButtons";
-import { PlayingField } from "./game/PlayingField";
+import { PlayingCard } from "./PlayingCard";
 
 interface GameTableProps {
   gameState: GameState;
@@ -21,6 +21,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const isFirstPlay = isFirstGame && gameState.gameHistory.length === 0;
 
   useEffect(() => {
+    // Clear selected cards when current player changes
     setSelectedCards([]);
   }, [gameState.currentPlayerId]);
 
@@ -39,12 +40,14 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       return "Invalid card combination";
     }
 
+    // Check if it's the first play of the first game and contains 3 of Spades
     if (isFirstPlay) {
       const hasThreeOfSpades = cards.some(card => card.suit === "spade" && card.rank === "3");
       if (!hasThreeOfSpades) {
         return "First play must include 3 of Spades";
       }
     } else if (gameState.lastPlay && gameState.lastPlay.playType !== playType) {
+      // Check if it's a valid chomp of 2s
       const isChompingTwos = gameState.lastPlay.cards.every(card => card.rank === "2");
       if (!isChompingTwos) {
         return `Must play the same type as the last play (${gameState.lastPlay.playType})`;
@@ -56,6 +59,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
       }
     }
 
+    // Only validate against last play if there is one
     if (gameState.lastPlay && !isValidPlay(cards, gameState.lastPlay)) {
       return "Selected cards must be stronger than the last play";
     }
@@ -101,43 +105,74 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
     setAnimatingCards(selectedCards);
     
+    // Delay the actual play until animation completes
     setTimeout(() => {
       onPlay(selectedCards);
       setSelectedCards([]);
       setAnimatingCards([]);
-    }, 500);
-  };
-
-  const getPlayerName = (playerId: string): string => {
-    return gameState.players.find(p => p.id === playerId)?.name || "";
+    }, 500); // Match this with animation duration
   };
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
-      <ActionButtons
-        isCurrentPlayer={!!currentPlayer}
-        gameStatus={gameState.gameStatus}
-        onPlay={handlePlay}
-        onPass={onPass}
-      />
+      {/* Action buttons */}
+      {currentPlayer && gameState.gameStatus === "playing" && (
+        <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+          <Button
+            variant="secondary"
+            onClick={handlePlay}
+            className="px-8 py-4 text-lg font-semibold bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
+          >
+            Play
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={onPass}
+            className="px-8 py-4 text-lg font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            Pass
+          </Button>
+        </div>
+      )}
 
-      <PlayingField
-        lastPlay={gameState.lastPlay}
-        animatingCards={animatingCards}
-        currentPlayerId={gameState.currentPlayerId}
-        lastPlayerId={gameState.lastPlayerId}
-        getPlayerName={getPlayerName}
-      />
+      {/* Center playing field */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] flex flex-col items-center justify-center">
+        {(gameState.lastPlay || animatingCards.length > 0) && (
+          <div className="text-white mb-4 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg">
+            Current Play: {gameState.lastPlay?.playType || getPlayType(animatingCards)} by {
+              gameState.players.find(p => p.id === (gameState.lastPlayerId || gameState.currentPlayerId))?.name
+            }
+          </div>
+        )}
+        <motion.div
+          className="p-8 rounded-xl bg-black/10 backdrop-blur-sm"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <AnimatePresence mode="wait">
+            {(gameState.lastPlay || animatingCards.length > 0) && (
+              <motion.div 
+                className="flex gap-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {(animatingCards.length > 0 ? animatingCards : gameState.lastPlay?.cards || []).map(card => (
+                  <PlayingCard key={card.id} card={card} isPlayable={false} />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
 
+      {/* Player hands */}
       {gameState.players.map((player, index) => {
         const position = ["bottom", "left", "top", "right"][index] as "bottom" | "left" | "top" | "right";
         const isCurrentPlayer = player.id === gameState.currentPlayerId;
         
-        // Skip player's turn if they have passed
-        if (player.hasPassed && gameState.consecutivePasses < 3) {
-          return null;
-        }
-
         return (
           <PlayerHand
             key={player.id}
@@ -149,14 +184,11 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
             position={position}
             playerName={player.name}
             hasPassed={player.hasPassed || false}
-            className={`
-              ${position === 'left' ? 'md:left-16 left-4' : ''}
-              ${position === 'right' ? 'md:right-16 right-4' : ''}
-            `}
           />
         );
       })}
 
+      {/* Game over overlay */}
       {gameState.gameStatus === "finished" && (
         <motion.div 
           className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
