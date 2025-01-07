@@ -157,9 +157,10 @@ const Index = () => {
         };
       }
 
+      // Reset all passes when a play is made
       return {
         ...prev,
-        players: updatedPlayers,
+        players: updatedPlayers.map(p => ({ ...p, hasPassed: false })),
         currentPlayerId: prev.players[nextPlayerIndex].id,
         lastPlay: newPlay,
         gameStatus: "playing",
@@ -172,14 +173,17 @@ const Index = () => {
   };
 
   const handlePass = () => {
-    console.log('Player passing turn');
     setGameState(prev => {
+      const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId);
+      console.log(`Player ${currentPlayer?.name} passed their turn`);
+      
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
-      // If all players have passed except the last player who played
-      if (newConsecutivePasses === 3) {
+      // If everyone has passed except the last player who played
+      if (newConsecutivePasses >= prev.players.length - 1) {
+        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId);
         // Reset all players' pass status and start new round
         return {
           ...prev,
@@ -214,11 +218,6 @@ const Index = () => {
     toast.info("Player passed");
   };
 
-  const handleReplayGame = (gameId: string) => {
-    // TODO: Implement replay functionality
-    toast.info("Replay functionality coming soon!");
-  };
-
   return (
     <div className="w-full h-screen bg-gray-900">
       <Button
@@ -238,7 +237,10 @@ const Index = () => {
       {showLeaderboard && (
         <Leaderboard
           gameHistory={gameState.completedGames}
-          onReplayGame={handleReplayGame}
+          onReplayGame={(gameId) => {
+            // TODO: Implement replay functionality
+            toast.info("Replay functionality coming soon!");
+          }}
           onClose={() => setShowLeaderboard(false)}
         />
       )}
