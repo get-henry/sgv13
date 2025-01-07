@@ -1,4 +1,4 @@
-import { Card, PlayType } from "@/types/game";
+import { Card, PlayType, Player } from "@/types/game";
 
 export const isValidPlay = (
   selectedCards: Card[],
