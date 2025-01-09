@@ -77,18 +77,18 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
     if (!playType) return false;
 
     // Single 2 can be chomped by consecutive pairs 3,3,4,4,5,5
-    if (lastPlayCards.length === 1 && playType === "consecutive-pairs" && cards.length === 6) {
+    if (lastPlayCards.length === 1 && playType === "Consecutive-pairs" && cards.length === 6) {
       return true;
     }
 
     // Pair of 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6 or four of a kind
     if (lastPlayCards.length === 2) {
-      if (playType === "consecutive-pairs" && cards.length === 8) return true;
-      if (playType === "four" && cards.length === 4) return true;
+      if (playType === "Consecutive-pairs" && cards.length === 8) return true;
+      if (playType === "Four" && cards.length === 4) return true;
     }
 
     // Triple 2s can be chomped by consecutive pairs 3,3,4,4,5,5,6,6,7,7
-    if (lastPlayCards.length === 3 && playType === "consecutive-pairs" && cards.length === 10) {
+    if (lastPlayCards.length === 3 && playType === "Consecutive-pairs" && cards.length === 10) {
       return true;
     }
 
