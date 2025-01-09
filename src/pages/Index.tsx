@@ -39,14 +39,14 @@ const Index = () => {
     if (!currentPlayer?.isAI) return;
 
     const timeoutId = setTimeout(() => {
-      console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
+      //console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
         console.log(`[AI] ${currentPlayer.name} is playing:`, aiPlay.map(card => card.id).join(', '));
         handlePlay(aiPlay);
       } else {
-        console.log(`[AI] ${currentPlayer.name} is passing`);
+        console.log(`[AI] ${currentPlayer.name} is passing - will be skipped until reset`);
         handlePass();
       }
     }, 1000);
@@ -98,7 +98,7 @@ const Index = () => {
   };
 
   const handlePlay = (cards: Card[]) => {
-    console.log('Processing play:', cards.map(card => card.id).join(', '));
+    //console.log('Processing play:', cards.map(card => card.id).join(', '));
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
@@ -177,7 +177,7 @@ const Index = () => {
     setGameState(prev => {
       const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId);
       if (!currentPlayer?.isAI) {
-        console.log(`Player ${currentPlayer?.name} passed their turn`);
+        console.log(`[Player] ${currentPlayer?.name} passed their turn - will be skipped until reset`);
       }
       
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
@@ -196,7 +196,7 @@ const Index = () => {
       const passedPlayersCount = updatedPlayers.filter(p => p.hasPassed).length;
       
       if (passedPlayersCount >= prev.players.length - 1) {
-        console.log(`All players have passed - Resetting turn to last player who played: ${prev.players.find(p => p.id === prev.lastPlayerId)?.name}`);
+        console.log(`Resetting turn to last player who played: ${prev.players.find(p => p.id === prev.lastPlayerId)?.name}`);
         
         return {
           ...prev,
@@ -212,7 +212,7 @@ const Index = () => {
         };
       }
 
-      console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
+      //console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
       
       return {
         ...prev,
