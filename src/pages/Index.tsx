@@ -42,10 +42,10 @@ const Index = () => {
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
-        console.log('[AI] ${currentPlayer?.name} is playing:', aiPlay.id);
+        console.log(`[AI] ${currentPlayer.name} is playing:`, aiPlay.map(card => card.id).join(', '));
         handlePlay(aiPlay);
       } else {
-        console.log('[AI] ${currentPlayer?.name} is passing');
+        console.log(`[AI] ${currentPlayer.name} is passing`);
         handlePass();
       }
     }, 1000);
@@ -97,7 +97,7 @@ const Index = () => {
   };
 
   const handlePlay = (cards: Card[]) => {
-    console.log('Processing play:', cards.id);
+    console.log('Processing play:', cards.map(card => card.id).join(', '));
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
