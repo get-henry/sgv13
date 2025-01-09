@@ -32,14 +32,12 @@ const Index = () => {
     startNewGame();
   }, []);
 
-  // Modified useEffect to handle AI turns
   useEffect(() => {
     if (gameState.gameStatus !== "playing") return;
     
     const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
     if (!currentPlayer?.isAI) return;
 
-    // Clear any existing timeouts to prevent multiple AI moves
     const timeoutId = setTimeout(() => {
       console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
@@ -53,7 +51,6 @@ const Index = () => {
       }
     }, 1000);
 
-    // Cleanup timeout on component unmount or when dependencies change
     return () => clearTimeout(timeoutId);
   }, [gameState.currentPlayerId, gameState.gameStatus, gameState.lastPlay]);
 
@@ -185,32 +182,7 @@ const Index = () => {
       
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
-      const newConsecutivePasses = prev.consecutivePasses + 1;
 
-      // Check if all non-passed players have passed
-      const activePlayers = prev.players.filter(p => !p.hasPassed);
-      if (activePlayers.length <= 1) {
-        // Find the player who made the last play
-        const lastPlayerId = prev.lastPlayerId;
-        const lastPlayer = prev.players.find(p => p.id === lastPlayerId);
-        console.log(`All players have passed - Resetting turn to last player who played: ${lastPlayer?.name}`);
-        
-        // Reset all players' pass status and set current turn to last player who played
-        return {
-          ...prev,
-          players: prev.players.map(player => ({
-            ...player,
-            isCurrentTurn: player.id === lastPlayerId,
-            hasPassed: false
-          })),
-          currentPlayerId: lastPlayerId || prev.currentPlayerId,
-          lastPlay: null,
-          consecutivePasses: 0,
-          lastPlayerId: null // Reset lastPlayerId as we're starting a new round
-        };
-      }
-
-      console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
       const updatedPlayers = prev.players.map(player => {
         if (player.id === prev.currentPlayerId) {
           return { ...player, hasPassed: true, isCurrentTurn: false };
@@ -221,11 +193,32 @@ const Index = () => {
         return player;
       });
 
+      const passedPlayersCount = updatedPlayers.filter(p => p.hasPassed).length;
+      
+      if (passedPlayersCount >= prev.players.length - 1) {
+        console.log(`All players have passed - Resetting turn to last player who played: ${prev.players.find(p => p.id === prev.lastPlayerId)?.name}`);
+        
+        return {
+          ...prev,
+          players: prev.players.map(player => ({
+            ...player,
+            isCurrentTurn: player.id === prev.lastPlayerId,
+            hasPassed: false
+          })),
+          currentPlayerId: prev.lastPlayerId || prev.currentPlayerId,
+          lastPlay: null,
+          consecutivePasses: 0,
+          lastPlayerId: null
+        };
+      }
+
+      console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
+      
       return {
         ...prev,
         players: updatedPlayers,
         currentPlayerId: prev.players[nextPlayerIndex].id,
-        consecutivePasses: newConsecutivePasses,
+        consecutivePasses: prev.consecutivePasses + 1,
       };
     });
 
