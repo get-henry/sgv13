@@ -39,7 +39,6 @@ const Index = () => {
     if (!currentPlayer?.isAI) return;
 
     const timeoutId = setTimeout(() => {
-      // console.log('AI Turn - Processing move for:', currentPlayer.name);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
@@ -58,7 +57,6 @@ const Index = () => {
     const deck = shuffleDeck(createDeck());
     const hands = dealCards(deck);
     
-    // If it's not the first game, the winner starts
     let startingPlayerIndex = gameState.completedGames.length === 0 
       ? findStartingPlayer(hands)
       : gameState.players.findIndex(p => p.id === gameState.winner);
@@ -157,7 +155,6 @@ const Index = () => {
         };
       }
 
-      // Reset all passes when a play is made
       return {
         ...prev,
         players: updatedPlayers.map(p => ({ ...p, hasPassed: false })),
@@ -175,17 +172,14 @@ const Index = () => {
   const handlePass = () => {
     setGameState(prev => {
       const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId);
-      if (!currentPlayer?.isAI) console.log(`[Player] ${currentPlayer?.name} passed their turn`);
-      
+      console.log(`Player ${currentPlayer?.name} passed their turn`);
       
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
-      // If everyone has passed except the last player who played
       if (newConsecutivePasses >= prev.players.length - 1) {
-        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId.name);
-        // Reset all players' pass status and start new round
+        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId);
         return {
           ...prev,
           players: prev.players.map(player => ({
@@ -199,18 +193,20 @@ const Index = () => {
         };
       }
 
-      // Mark current player as passed and move to next player
+      const updatedPlayers = prev.players.map(player => {
+        if (player.id === prev.currentPlayerId) {
+          console.log(`Marking ${player.name} as passed - will be skipped until reset`);
+          return { ...player, hasPassed: true, isCurrentTurn: false };
+        }
+        if (player.id === prev.players[nextPlayerIndex].id) {
+          return { ...player, isCurrentTurn: true };
+        }
+        return player;
+      });
+
       return {
         ...prev,
-        players: prev.players.map(player => {
-          if (player.id === prev.currentPlayerId) {
-            return { ...player, hasPassed: true, isCurrentTurn: false };
-          }
-          if (player.id === prev.players[nextPlayerIndex].id) {
-            return { ...player, isCurrentTurn: true };
-          }
-          return player;
-        }),
+        players: updatedPlayers,
         currentPlayerId: prev.players[nextPlayerIndex].id,
         consecutivePasses: newConsecutivePasses,
       };
@@ -239,7 +235,6 @@ const Index = () => {
         <Leaderboard
           gameHistory={gameState.completedGames}
           onReplayGame={(gameId) => {
-            // TODO: Implement replay functionality
             toast.info("Replay functionality coming soon!");
           }}
           onClose={() => setShowLeaderboard(false)}

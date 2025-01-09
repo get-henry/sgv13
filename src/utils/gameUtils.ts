@@ -8,6 +8,12 @@ export const isValidPlay = (
   
   const playType = getPlayType(selectedCards);
   if (!playType || playType !== lastPlay.playType) return false;
+
+  if (playType === "straight") {
+    const selectedHighestRank = Math.max(...selectedCards.map(c => getRankValue(c.rank)));
+    const lastPlayHighestRank = Math.max(...lastPlay.cards.map(c => getRankValue(c.rank)));
+    return selectedHighestRank > lastPlayHighestRank;
+  }
   
   const highestNewCard = selectedCards.reduce((prev, curr) => 
     compareCards(prev, curr) > 0 ? prev : curr
@@ -37,12 +43,12 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
     return "four";
   }
 
-  // Check for straight (3 or more consecutive cards)
-  if (cards.length >= 3) {
-    const sortedCards = [...cards].sort((a, b) => a.order - b.order);
+  // Check for straight (5 consecutive cards)
+  if (cards.length === 5) {
+    const sortedByRank = [...cards].sort((a, b) => getRankValue(a.rank) - getRankValue(b.rank));
     let isConsecutive = true;
-    for (let i = 1; i < sortedCards.length; i++) {
-      if (sortedCards[i].order - sortedCards[i - 1].order !== 1) {
+    for (let i = 1; i < sortedByRank.length; i++) {
+      if (getRankValue(sortedByRank[i].rank) - getRankValue(sortedByRank[i - 1].rank) !== 1) {
         isConsecutive = false;
         break;
       }
@@ -51,6 +57,11 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
   }
   
   return null;
+};
+
+export const getRankValue = (rank: string): number => {
+  const rankOrder = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2"];
+  return rankOrder.indexOf(rank);
 };
 
 export const compareCards = (card1: Card, card2: Card): number => {
