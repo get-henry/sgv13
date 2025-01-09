@@ -121,9 +121,10 @@ const Index = () => {
       });
 
       const winner = updatedPlayers.find(p => p.cards.length === 0)?.id || null;
-
+      const playType = getPlayType(cards);
+      
       const newPlay = {
-        playType: getPlayType(cards) || "single",
+        playType: playType ? playType.charAt(0).toUpperCase() + playType.slice(1) : 'Single',
         cards,
         playerId: prev.currentPlayerId,
       };
@@ -157,7 +158,7 @@ const Index = () => {
 
       return {
         ...prev,
-        players: updatedPlayers.map(p => ({ ...p, hasPassed: false })),
+        players: updatedPlayers,
         currentPlayerId: prev.players[nextPlayerIndex].id,
         lastPlay: newPlay,
         gameStatus: "playing",
@@ -172,14 +173,19 @@ const Index = () => {
   const handlePass = () => {
     setGameState(prev => {
       const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId);
-      console.log(`Player ${currentPlayer?.name} passed their turn`);
+      if (!currentPlayer?.isAI) {
+        console.log(`Player ${currentPlayer?.name} passed their turn`);
+      }
       
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
       const newConsecutivePasses = prev.consecutivePasses + 1;
 
-      if (newConsecutivePasses >= prev.players.length - 1) {
-        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId);
+      // Check if all non-passed players have passed
+      const activePlayers = prev.players.filter(p => !p.hasPassed);
+      if (activePlayers.length <= 1) {
+        const lastPlayer = prev.players.find(p => p.id === prev.lastPlayerId);
+        console.log(`All players have passed - Resetting turn to last player: ${lastPlayer?.name}`);
         return {
           ...prev,
           players: prev.players.map(player => ({

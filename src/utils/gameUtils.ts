@@ -29,18 +29,18 @@ export const isValidPlay = (
 export const getPlayType = (cards: Card[]): PlayType | null => {
   if (!cards.length) return null;
   
-  if (cards.length === 1) return "single";
+  if (cards.length === 1) return "Single";
   
   if (cards.length === 2 && cards[0].rank === cards[1].rank) {
-    return "pair";
+    return "Pair";
   }
   
   if (cards.length === 3 && cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank) {
-    return "triple";
+    return "Triple";
   }
   
   if (cards.length === 4 && cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank && cards[2].rank === cards[3].rank) {
-    return "four";
+    return "Four";
   }
 
   // Check for straight (5 consecutive cards)
@@ -53,7 +53,31 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
         break;
       }
     }
-    if (isConsecutive) return "straight";
+    if (isConsecutive) return "Straight";
+  }
+
+  // Check for consecutive pairs
+  if (cards.length >= 6 && cards.length % 2 === 0) {
+    const sortedByRank = [...cards].sort((a, b) => getRankValue(a.rank) - getRankValue(b.rank));
+    let isConsecutivePairs = true;
+    
+    for (let i = 0; i < sortedByRank.length; i += 2) {
+      if (i + 1 >= sortedByRank.length || sortedByRank[i].rank !== sortedByRank[i + 1].rank) {
+        isConsecutivePairs = false;
+        break;
+      }
+      
+      if (i + 2 < sortedByRank.length) {
+        const currentRankValue = getRankValue(sortedByRank[i].rank);
+        const nextRankValue = getRankValue(sortedByRank[i + 2].rank);
+        if (nextRankValue - currentRankValue !== 1) {
+          isConsecutivePairs = false;
+          break;
+        }
+      }
+    }
+    
+    if (isConsecutivePairs) return "Consecutive-pairs";
   }
   
   return null;
