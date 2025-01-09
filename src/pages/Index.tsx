@@ -39,14 +39,14 @@ const Index = () => {
     if (!currentPlayer?.isAI) return;
 
     const timeoutId = setTimeout(() => {
-      console.log('AI Turn - Processing move for:', currentPlayer.name);
+      // console.log('AI Turn - Processing move for:', currentPlayer.name);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
-        console.log('AI is playing:', aiPlay);
+        console.log('[AI] ${currentPlayer?.name} is playing:', aiPlay.id);
         handlePlay(aiPlay);
       } else {
-        console.log('AI is passing');
+        console.log('[AI] ${currentPlayer?.name} is passing');
         handlePass();
       }
     }, 1000);
@@ -99,7 +99,7 @@ const Index = () => {
   };
 
   const handlePlay = (cards: Card[]) => {
-    console.log('Processing play:', cards);
+    console.log('Processing play:', cards.id);
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
@@ -175,7 +175,8 @@ const Index = () => {
   const handlePass = () => {
     setGameState(prev => {
       const currentPlayer = prev.players.find(p => p.id === prev.currentPlayerId);
-      console.log(`Player ${currentPlayer?.name} passed their turn`);
+      if (!currentPlayer?.isAI) console.log(`[Player] ${currentPlayer?.name} passed their turn`);
+      
       
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
@@ -183,7 +184,7 @@ const Index = () => {
 
       // If everyone has passed except the last player who played
       if (newConsecutivePasses >= prev.players.length - 1) {
-        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId);
+        console.log('All players have passed - Resetting turn to last player:', prev.lastPlayerId.name);
         // Reset all players' pass status and start new round
         return {
           ...prev,
