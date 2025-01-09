@@ -32,13 +32,16 @@ const Index = () => {
     startNewGame();
   }, []);
 
+  // Modified useEffect to handle AI turns
   useEffect(() => {
     if (gameState.gameStatus !== "playing") return;
     
     const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
     if (!currentPlayer?.isAI) return;
 
+    // Clear any existing timeouts to prevent multiple AI moves
     const timeoutId = setTimeout(() => {
+      console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
@@ -50,8 +53,9 @@ const Index = () => {
       }
     }, 1000);
 
+    // Cleanup timeout on component unmount or when dependencies change
     return () => clearTimeout(timeoutId);
-  }, [gameState.currentPlayerId, gameState.gameStatus]);
+  }, [gameState.currentPlayerId, gameState.gameStatus, gameState.lastPlay]);
 
   const startNewGame = () => {
     const deck = shuffleDeck(createDeck());
@@ -123,7 +127,7 @@ const Index = () => {
       const winner = updatedPlayers.find(p => p.cards.length === 0)?.id || null;
       const playType = getPlayType(cards);
       
-      if (!playType) return prev; // Return previous state if play type is invalid
+      if (!playType) return prev;
 
       const newPlay = {
         playType,
@@ -201,9 +205,9 @@ const Index = () => {
         };
       }
 
+      console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
       const updatedPlayers = prev.players.map(player => {
         if (player.id === prev.currentPlayerId) {
-          console.log(`Marking ${player.name} as passed - will be skipped until reset`);
           return { ...player, hasPassed: true, isCurrentTurn: false };
         }
         if (player.id === prev.players[nextPlayerIndex].id) {
