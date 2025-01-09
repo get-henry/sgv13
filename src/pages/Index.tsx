@@ -190,18 +190,23 @@ const Index = () => {
       // Check if all non-passed players have passed
       const activePlayers = prev.players.filter(p => !p.hasPassed);
       if (activePlayers.length <= 1) {
-        const lastPlayer = prev.players.find(p => p.id === prev.lastPlayerId);
-        console.log(`All players have passed - Resetting turn to last player: ${lastPlayer?.name}`);
+        // Find the player who made the last play
+        const lastPlayerId = prev.lastPlayerId;
+        const lastPlayer = prev.players.find(p => p.id === lastPlayerId);
+        console.log(`All players have passed - Resetting turn to last player who played: ${lastPlayer?.name}`);
+        
+        // Reset all players' pass status and set current turn to last player who played
         return {
           ...prev,
           players: prev.players.map(player => ({
             ...player,
-            isCurrentTurn: player.id === prev.lastPlayerId,
+            isCurrentTurn: player.id === lastPlayerId,
             hasPassed: false
           })),
-          currentPlayerId: prev.lastPlayerId || prev.currentPlayerId,
+          currentPlayerId: lastPlayerId || prev.currentPlayerId,
           lastPlay: null,
           consecutivePasses: 0,
+          lastPlayerId: null // Reset lastPlayerId as we're starting a new round
         };
       }
 
