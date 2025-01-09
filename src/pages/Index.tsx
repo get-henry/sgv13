@@ -123,8 +123,10 @@ const Index = () => {
       const winner = updatedPlayers.find(p => p.cards.length === 0)?.id || null;
       const playType = getPlayType(cards);
       
+      if (!playType) return prev; // Return previous state if play type is invalid
+
       const newPlay = {
-        playType: playType ? playType.charAt(0).toUpperCase() + playType.slice(1) : 'Single',
+        playType,
         cards,
         playerId: prev.currentPlayerId,
       };

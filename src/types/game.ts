@@ -18,7 +18,7 @@ export interface Player {
   hasPassed?: boolean;
 }
 
-export type PlayType = "single" | "pair" | "triple" | "four" | "straight" | "consecutive-pairs";
+export type PlayType = "Single" | "Pair" | "Triple" | "Four" | "Straight" | "Consecutive-pairs";
 
 export interface GameState {
   players: Player[];

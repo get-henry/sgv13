@@ -9,7 +9,7 @@ export const isValidPlay = (
   const playType = getPlayType(selectedCards);
   if (!playType || playType !== lastPlay.playType) return false;
 
-  if (playType === "straight") {
+  if (playType === "Straight") {
     const selectedHighestRank = Math.max(...selectedCards.map(c => getRankValue(c.rank)));
     const lastPlayHighestRank = Math.max(...lastPlay.cards.map(c => getRankValue(c.rank)));
     return selectedHighestRank > lastPlayHighestRank;
