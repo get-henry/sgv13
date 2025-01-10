@@ -33,14 +33,38 @@ export const checkForThirteenCardStraight = (player: Player): boolean => {
 };
 
 export const handleThirteenCardStraight = (player: Player): void => {
+  console.log("Checking for 13-card straight in player's hand:", player.cards);
   if (checkForThirteenCardStraight(player)) {
-    toast.success(`🎉 INCREDIBLE! ${player.name} has a 13-card straight! Automatic win!`, {
-      duration: 5000,
-      style: {
-        background: 'linear-gradient(to right, #4f46e5, #7c3aed)',
-        color: 'white',
-        fontSize: '1.1em'
-      }
-    });
+    console.log("13-card straight found!");
+    // Show multiple toasts in sequence for dramatic effect
+    toast.success("🎲 CHECKING HAND...", { duration: 1000 });
+    
+    setTimeout(() => {
+      toast.success("🃏 INCREDIBLE HAND DETECTED!", { duration: 2000 });
+    }, 1000);
+    
+    setTimeout(() => {
+      toast.success(`🎉 AMAZING! ${player.name} has a 13-card straight!`, {
+        duration: 5000,
+        style: {
+          background: 'linear-gradient(to right, #4f46e5, #7c3aed)',
+          color: 'white',
+          fontSize: '1.2em',
+          fontWeight: 'bold'
+        }
+      });
+    }, 2000);
+    
+    setTimeout(() => {
+      toast.success("👑 AUTOMATIC WIN!", {
+        duration: 5000,
+        style: {
+          background: 'linear-gradient(to right, #fbbf24, #d97706)',
+          color: 'white',
+          fontSize: '1.2em',
+          fontWeight: 'bold'
+        }
+      });
+    }, 3000);
   }
 };
