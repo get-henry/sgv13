@@ -25,7 +25,7 @@ const findBestStraight = (cards: Card[]): Card[] | null => {
         currentStraight.push(sortedCards[j]);
       }
     }
-    if (currentStraight.length > bestStraight.length && currentStraight.length >= 3) {
+    if (currentStraight.length >= 3 && currentStraight.length > bestStraight.length) {
       bestStraight = currentStraight;
     }
   }
@@ -35,7 +35,6 @@ const findBestStraight = (cards: Card[]): Card[] | null => {
 
 const findPossiblePlays = (cards: Card[], lastPlay: GameState['lastPlay']): Card[][] => {
   const possiblePlays: Card[][] = [];
-  const groups = groupCardsByRank(cards);
   
   // Try singles
   cards.forEach(card => {
@@ -45,7 +44,8 @@ const findPossiblePlays = (cards: Card[], lastPlay: GameState['lastPlay']): Card
     }
   });
   
-  // Try pairs and other combinations
+  // Try pairs
+  const groups = groupCardsByRank(cards);
   Object.values(groups).forEach(group => {
     if (group.length >= 2) {
       const play = group.slice(0, 2);
@@ -57,8 +57,10 @@ const findPossiblePlays = (cards: Card[], lastPlay: GameState['lastPlay']): Card
   
   // Try straights
   const straight = findBestStraight(cards);
-  if (straight && (!lastPlay || isValidPlay(straight, lastPlay))) {
-    possiblePlays.push(straight);
+  if (straight) {
+    if (!lastPlay || isValidPlay(straight, lastPlay)) {
+      possiblePlays.push(straight);
+    }
   }
   
   return possiblePlays;
@@ -82,18 +84,14 @@ export const determineAIPlay = (gameState: GameState, playerId: string): Card[] 
   const cards = player.cards;
   const lastPlay = gameState.lastPlay;
   
-  // If we can win this round, do it
-  const winningPlay = findHighestValidPlay(cards, lastPlay);
-  if (winningPlay) {
-    // If we have few cards left, try to win to control next round
-    if (cards.length <= 4) return winningPlay;
-  }
-  
   // If starting a new round (no last play)
   if (!lastPlay) {
     // Try to play a straight if possible
     const straight = findBestStraight(cards);
-    if (straight) return straight;
+    if (straight) {
+      console.log(`[AI] ${player.name} found a straight:`, straight);
+      return straight;
+    }
     
     // Otherwise play lowest single
     const lowestSingle = findLowestSingle(cards);
@@ -106,6 +104,13 @@ export const determineAIPlay = (gameState: GameState, playerId: string): Card[] 
   const possiblePlays = findPossiblePlays(cards, lastPlay);
   if (possiblePlays.length === 0) return null;
   
-  // Play lowest valid combination
-  return possiblePlays[0];
+  // Prioritize straights if available
+  const straightPlay = possiblePlays.find(play => getPlayType(play) === "Straight");
+  if (straightPlay) {
+    console.log(`[AI] ${player.name} playing straight:`, straightPlay);
+    return straightPlay;
+  }
+  
+  // Play the highest valid combination
+  return possiblePlays[possiblePlays.length - 1];
 };
