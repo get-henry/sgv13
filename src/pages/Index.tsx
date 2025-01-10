@@ -31,13 +31,13 @@ const Index = () => {
   const handlePlay = (cards: Card[]) => {
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
+      const currentPlayer = prev.players[currentPlayerIndex];
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
       
       if (!currentPlayer?.isAI) {
-        console.log(`[Player] ${currentPlayer?.name} is playing:`, aiPlay.map(card => card.id).join(', '));
+        console.log(`[Player] ${currentPlayer?.name} is playing:`, cards.map(card => card.id).join(', '));
       }
       
-    
       const updatedPlayers = prev.players.map(player => {
         if (player.id === prev.currentPlayerId) {
           const remainingCards = player.cards.filter(
@@ -147,8 +147,6 @@ const Index = () => {
         };
       }
 
-      //console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
-      
       return {
         ...prev,
         players: updatedPlayers,
