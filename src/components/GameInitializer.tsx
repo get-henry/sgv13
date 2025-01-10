@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 interface GameInitializerProps {
   gameState: GameState;
-  setGameState: (state: GameState) => void;
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>;
 }
 
 export const GameInitializer = ({ gameState, setGameState }: GameInitializerProps) => {
