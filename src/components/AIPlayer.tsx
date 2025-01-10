@@ -16,7 +16,7 @@ export const AIPlayer = ({ gameState, onPlay, onPass }: AIPlayerProps) => {
     if (!currentPlayer?.isAI) return;
 
     const timeoutId = setTimeout(() => {
-      console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
+      //console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
       const aiPlay = determineAIPlay(gameState, currentPlayer.id);
       
       if (aiPlay) {
