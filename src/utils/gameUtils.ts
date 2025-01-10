@@ -26,6 +26,8 @@ export const isValidPlay = (
   return compareCards(highestNewCard, highestLastCard) > 0;
 };
 
+import { isValidStraight } from "./straightUtils";
+
 export const getPlayType = (cards: Card[]): PlayType | null => {
   if (!cards.length) return null;
   
@@ -43,17 +45,9 @@ export const getPlayType = (cards: Card[]): PlayType | null => {
     return "Four";
   }
 
-  // Check for straight (5 consecutive cards)
-  if (cards.length === 5) {
-    const sortedByRank = [...cards].sort((a, b) => getRankValue(a.rank) - getRankValue(b.rank));
-    let isConsecutive = true;
-    for (let i = 1; i < sortedByRank.length; i++) {
-      if (getRankValue(sortedByRank[i].rank) - getRankValue(sortedByRank[i - 1].rank) !== 1) {
-        isConsecutive = false;
-        break;
-      }
-    }
-    if (isConsecutive) return "Straight";
+  // Use the new straight validation
+  if (cards.length >= 3 && isValidStraight(cards)) {
+    return "Straight";
   }
 
   // Check for consecutive pairs

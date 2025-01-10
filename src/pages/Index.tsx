@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { GameState, Card, GameHistoryEntry } from "@/types/game";
 import { GameTable } from "@/components/GameTable";
 import { Leaderboard } from "@/components/Leaderboard";
-import { createDeck, shuffleDeck } from "@/utils/cardUtils";
-import { dealCards, findStartingPlayer, getPlayType, findNextActivePlayer } from "@/utils/gameUtils";
-import { determineAIPlay } from "@/utils/aiUtils";
+import { GameInitializer } from "@/components/GameInitializer";
+import { AIPlayer } from "@/components/AIPlayer";
+import { getPlayType, findNextActivePlayer } from "@/utils/gameUtils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -28,77 +28,7 @@ const Index = () => {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  useEffect(() => {
-    startNewGame();
-  }, []);
-
-  useEffect(() => {
-    if (gameState.gameStatus !== "playing") return;
-    
-    const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-    if (!currentPlayer?.isAI) return;
-
-    const timeoutId = setTimeout(() => {
-      //console.log(`[AI Turn] ${currentPlayer.name}'s turn after reset`);
-      const aiPlay = determineAIPlay(gameState, currentPlayer.id);
-      
-      if (aiPlay) {
-        console.log(`[AI] ${currentPlayer.name} is playing:`, aiPlay.map(card => card.id).join(', '));
-        handlePlay(aiPlay);
-      } else {
-        console.log(`[AI] ${currentPlayer.name} is passing - will be skipped until reset`);
-        handlePass();
-      }
-    }, 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, [gameState.currentPlayerId, gameState.gameStatus, gameState.lastPlay]);
-
-  const startNewGame = () => {
-    const deck = shuffleDeck(createDeck());
-    const hands = dealCards(deck);
-    
-    let startingPlayerIndex = gameState.completedGames.length === 0 
-      ? findStartingPlayer(hands)
-      : gameState.players.findIndex(p => p.id === gameState.winner);
-    
-    if (startingPlayerIndex === -1) startingPlayerIndex = 0;
-
-    const rotateToBottom = (arr: any[], startIndex: number) => {
-      if (startIndex === 0) return arr;
-      const rotated = [...arr];
-      while (rotated[0].isAI) {
-        rotated.push(rotated.shift());
-      }
-      return rotated;
-    };
-
-    const arrangedPlayers = rotateToBottom(
-      gameState.players.map((player, index) => ({
-        ...player,
-        cards: hands[index],
-        isCurrentTurn: index === startingPlayerIndex,
-      })),
-      startingPlayerIndex
-    );
-
-    setGameState(prev => ({
-      ...prev,
-      players: arrangedPlayers,
-      currentPlayerId: arrangedPlayers[startingPlayerIndex].id,
-      lastPlay: null,
-      gameStatus: "playing",
-      winner: null,
-      gameHistory: [],
-      consecutivePasses: 0,
-      lastPlayerId: null,
-    }));
-
-    toast.success("New game started!");
-  };
-
   const handlePlay = (cards: Card[]) => {
-    //console.log('Processing play:', cards.map(card => card.id).join(', '));
     setGameState(prev => {
       const currentPlayerIndex = prev.players.findIndex(p => p.id === prev.currentPlayerId);
       const nextPlayerIndex = findNextActivePlayer(prev.players, currentPlayerIndex);
@@ -196,7 +126,7 @@ const Index = () => {
       const passedPlayersCount = updatedPlayers.filter(p => p.hasPassed).length;
       
       if (passedPlayersCount >= prev.players.length - 1) {
-        console.log(`Resetting turn to last player who played: ${prev.players.find(p => p.id === prev.lastPlayerId)?.name}`);
+        console.log(`All players have passed - Resetting turn to last player who played: ${prev.players.find(p => p.id === prev.lastPlayerId)?.name}`);
         
         return {
           ...prev,
@@ -212,7 +142,7 @@ const Index = () => {
         };
       }
 
-      //console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
+      console.log(`Marking ${currentPlayer?.name} as passed - will be skipped until reset`);
       
       return {
         ...prev,
@@ -234,6 +164,9 @@ const Index = () => {
       >
         View Leaderboard
       </Button>
+      
+      <GameInitializer gameState={gameState} setGameState={setGameState} />
+      <AIPlayer gameState={gameState} onPlay={handlePlay} onPass={handlePass} />
       
       <GameTable
         gameState={gameState}
