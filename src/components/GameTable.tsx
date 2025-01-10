@@ -96,7 +96,7 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   };
 
   const handlePlay = () => {
-    console.log("Attempting to play cards:", selectedCards);
+    //console.log("Attempting to play cards:", selectedCards);
     const error = validatePlay(selectedCards);
     if (error) {
       toast.error(error);
