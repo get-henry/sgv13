@@ -9,10 +9,20 @@ import { AuthError, AuthApiError } from "@supabase/supabase-js";
 const Auth = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Check if user is already authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsAuthenticated(true);
+        navigate('/game');
+      }
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
+        setIsAuthenticated(true);
         navigate('/game');
       }
       if (event === 'USER_UPDATED') {
@@ -22,6 +32,7 @@ const Auth = () => {
         }
       }
       if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
         setErrorMessage("");
       }
     });
@@ -46,6 +57,11 @@ const Auth = () => {
     }
     return error.message;
   };
+
+  // Prevent showing auth UI if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
