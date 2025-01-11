@@ -9,7 +9,98 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      game_players: {
+        Row: {
+          cards: Json | null
+          created_at: string
+          game_id: string | null
+          has_passed: boolean | null
+          id: string
+          player_number: number
+          user_id: string | null
+        }
+        Insert: {
+          cards?: Json | null
+          created_at?: string
+          game_id?: string | null
+          has_passed?: boolean | null
+          id?: string
+          player_number: number
+          user_id?: string | null
+        }
+        Update: {
+          cards?: Json | null
+          created_at?: string
+          game_id?: string | null
+          has_passed?: boolean | null
+          id?: string
+          player_number?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string
+          current_player_id: string | null
+          game_state: Json
+          id: string
+          last_play: Json | null
+          status: string
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_player_id?: string | null
+          game_state: Json
+          id?: string
+          last_play?: Json | null
+          status: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_player_id?: string | null
+          game_state?: Json
+          id?: string
+          last_play?: Json | null
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
