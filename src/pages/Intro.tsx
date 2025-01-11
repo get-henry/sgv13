@@ -2,16 +2,29 @@ import { Button } from "@/components/ui/button";
 import { User, Users, Computer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 const Intro = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate('/game');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleLogin = () => {
-    toast.info("Login functionality coming soon!");
+    navigate('/auth');
   };
 
   const handleOnlineGame = () => {
-    toast.info("Online multiplayer coming soon!");
+    toast.info("Please login first to play online!");
+    navigate('/auth');
   };
 
   const handleLocalGame = () => {

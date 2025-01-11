@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { GameState, Player } from "@/types/game";
-import { createDeck, shuffleDeck } from "@/utils/cardUtils";
+import { createDeck } from "@/utils/cardUtils";
 import { dealCards, findStartingPlayer } from "@/utils/gameUtils";
 import { handleThirteenCardStraight } from "@/utils/straightUtils";
 import { toast } from "sonner";
@@ -12,7 +12,8 @@ interface GameInitializerProps {
 
 export const GameInitializer = ({ gameState, setGameState }: GameInitializerProps) => {
   const startNewGame = () => {
-    const deck = shuffleDeck(createDeck());
+    // Create and shuffle the deck in one step
+    const deck = createDeck();
     const hands = dealCards(deck);
     
     let startingPlayerIndex = gameState.completedGames.length === 0 
