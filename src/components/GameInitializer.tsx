@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { GameState, Player } from "@/types/game";
-import { createDeck } from "@/utils/cardUtils";
+import { createDeck, shuffleDeck } from "@/utils/cardUtils";
 import { dealCards, findStartingPlayer } from "@/utils/gameUtils";
 import { handleThirteenCardStraight } from "@/utils/straightUtils";
 import { toast } from "sonner";
@@ -12,8 +12,8 @@ interface GameInitializerProps {
 
 export const GameInitializer = ({ gameState, setGameState }: GameInitializerProps) => {
   const startNewGame = () => {
-    // Create and shuffle the deck in one step
-    const deck = createDeck();
+    // Create and shuffle the deck
+    const deck = shuffleDeck(createDeck());
     const hands = dealCards(deck);
     
     let startingPlayerIndex = gameState.completedGames.length === 0 
@@ -42,9 +42,24 @@ export const GameInitializer = ({ gameState, setGameState }: GameInitializerProp
 
     // Check for 13-card straight in any player's hand
     arrangedPlayers.forEach(player => {
-      handleThirteenCardStraight(player);
+      if (handleThirteenCardStraight(player)) {
+        // Set the game state to finished with this player as winner
+        setGameState(prev => ({
+          ...prev,
+          players: arrangedPlayers,
+          currentPlayerId: arrangedPlayers[startingPlayerIndex].id,
+          lastPlay: null,
+          gameStatus: "finished",
+          winner: player.id,
+          gameHistory: [],
+          consecutivePasses: 0,
+          lastPlayerId: null,
+        }));
+        return;
+      }
     });
 
+    // Only set normal game state if no 13-card straight was found
     setGameState(prev => ({
       ...prev,
       players: arrangedPlayers,

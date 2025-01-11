@@ -32,7 +32,7 @@ export const checkForThirteenCardStraight = (player: Player): boolean => {
   return true;
 };
 
-export const handleThirteenCardStraight = (player: Player): void => {
+export const handleThirteenCardStraight = (player: Player): boolean => {
   console.log("Checking for 13-card straight in player's hand:", player.cards);
   if (checkForThirteenCardStraight(player)) {
     console.log("13-card straight found!");
@@ -66,5 +66,8 @@ export const handleThirteenCardStraight = (player: Player): void => {
         }
       });
     }, 3000);
+    
+    return true;
   }
+  return false;
 };
