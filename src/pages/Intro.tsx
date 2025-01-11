@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { User, Users, Computer } from "lucide-react";
+import { User, Users, Computer, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Intro = () => {
   const navigate = useNavigate();
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -66,11 +68,48 @@ const Intro = () => {
             <Computer className="mr-2 h-6 w-6" />
             Play vs Computer
           </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full h-12 text-lg text-gray-400 hover:text-white transition-all"
+            onClick={() => setShowHowToPlay(true)}
+          >
+            <BookOpen className="mr-2 h-5 w-5" />
+            How to Play
+          </Button>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-8">
-          Play against AI or challenge real players online
-        </p>
+        <Dialog open={showHowToPlay} onOpenChange={setShowHowToPlay}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>How to Play Card Chomp Champions</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-left">
+              <p>Card Chomp Champions is a trick-taking card game where the goal is to be the first player to get rid of all your cards.</p>
+              
+              <h3 className="font-semibold text-lg">Basic Rules:</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>The game starts with the player holding the 3 of Spades.</li>
+                <li>Players must play cards that are higher in value than the previous play.</li>
+                <li>You can play singles, pairs, three of a kind, straights, and other combinations.</li>
+                <li>If you cannot beat the current play, you must pass.</li>
+                <li>When all players pass, the last player who made a valid play starts the next round.</li>
+              </ul>
+
+              <h3 className="font-semibold text-lg">Special Rules:</h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>2s are special cards that can be played on any combination.</li>
+                <li>When 2s are played, they can be "chomped" by specific combinations:
+                  <ul className="list-disc pl-6 mt-2">
+                    <li>Single 2: Can be chomped by three consecutive pairs (e.g., 3,3,4,4,5,5)</li>
+                    <li>Pair of 2s: Can be chomped by four consecutive pairs or four of a kind</li>
+                    <li>Three 2s: Can be chomped by five consecutive pairs</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

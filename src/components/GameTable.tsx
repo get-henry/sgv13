@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { isValidPlay, getPlayType } from "@/utils/gameUtils";
 import { PlayingCard } from "./PlayingCard";
+import { BookOpen, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface GameTableProps {
   gameState: GameState;
@@ -16,6 +19,8 @@ interface GameTableProps {
 export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [animatingCards, setAnimatingCards] = useState<Card[]>([]);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const navigate = useNavigate();
   const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const isFirstGame = gameState.completedGames.length === 0;
   const isFirstPlay = isFirstGame && gameState.gameHistory.length === 0;
@@ -115,6 +120,26 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
 
   return (
     <div className="relative w-full h-screen bg-table-felt border-8 border-table-border rounded-3xl overflow-hidden">
+      {/* Navigation buttons */}
+      <div className="absolute top-4 left-4 z-30 flex gap-2">
+        <Button
+          variant="ghost"
+          className="text-white/80 hover:text-white hover:bg-white/10"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Menu
+        </Button>
+        <Button
+          variant="ghost"
+          className="text-white/80 hover:text-white hover:bg-white/10"
+          onClick={() => setShowHowToPlay(true)}
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          How to Play
+        </Button>
+      </div>
+
       {/* Action buttons - Repositioned above player's hand */}
       {currentPlayer && gameState.gameStatus === "playing" && (
         <div className="absolute bottom-56 left-1/2 -translate-x-1/2 flex gap-4 z-30">
@@ -212,6 +237,38 @@ export const GameTable = ({ gameState, onPlay, onPass }: GameTableProps) => {
           </motion.div>
         </motion.div>
       )}
+
+      <Dialog open={showHowToPlay} onOpenChange={setShowHowToPlay}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>How to Play Card Chomp Champions</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-left">
+            <p>Card Chomp Champions is a trick-taking card game where the goal is to be the first player to get rid of all your cards.</p>
+            
+            <h3 className="font-semibold text-lg">Basic Rules:</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>The game starts with the player holding the 3 of Spades.</li>
+              <li>Players must play cards that are higher in value than the previous play.</li>
+              <li>You can play singles, pairs, three of a kind, straights, and other combinations.</li>
+              <li>If you cannot beat the current play, you must pass.</li>
+              <li>When all players pass, the last player who made a valid play starts the next round.</li>
+            </ul>
+
+            <h3 className="font-semibold text-lg">Special Rules:</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>2s are special cards that can be played on any combination.</li>
+              <li>When 2s are played, they can be "chomped" by specific combinations:
+                <ul className="list-disc pl-6 mt-2">
+                  <li>Single 2: Can be chomped by three consecutive pairs (e.g., 3,3,4,4,5,5)</li>
+                  <li>Pair of 2s: Can be chomped by four consecutive pairs or four of a kind</li>
+                  <li>Three 2s: Can be chomped by five consecutive pairs</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
